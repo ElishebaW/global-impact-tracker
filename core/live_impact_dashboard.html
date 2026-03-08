@@ -69,6 +69,43 @@
       line-height: 1.55;
     }
 
+    .star-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .star-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #f9fbff;
+    }
+
+    .star-label {
+      margin: 0;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .star-value {
+      margin: 6px 0 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .star-copy {
+      margin-top: 14px;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     #chartWrap {
       height: min(58vh, 420px);
     }
@@ -92,6 +129,39 @@
       </div>
     </section>
 
+    <section class="panel">
+      <h1>STAR Story Metrics</h1>
+      <p>Live metrics mapped to Situation, Task, Action, and Result.</p>
+      <div class="star-grid">
+        <article class="star-card">
+          <p class="star-label">Situation</p>
+          <p class="star-value" id="projectsCount">0</p>
+          <p>Active projects with logged orchestration impact.</p>
+        </article>
+        <article class="star-card">
+          <p class="star-label">Task</p>
+          <p class="star-value" id="projectedTotal">0.00h</p>
+          <p>Projected manual hours before automation.</p>
+        </article>
+        <article class="star-card">
+          <p class="star-label">Action</p>
+          <p class="star-value" id="aiActualTotal">0.00h</p>
+          <p>Actual AI-orchestrated execution hours.</p>
+        </article>
+        <article class="star-card">
+          <p class="star-label">Result</p>
+          <p class="star-value" id="latencyReduction">0.00%</p>
+          <p>Reduction in latency from manual baseline.</p>
+        </article>
+      </div>
+      <ol class="star-copy">
+        <li><strong>Situation:</strong> 0 live projects and 0 tracked tasks required a measurable efficiency baseline.</li>
+        <li><strong>Task:</strong> Manual execution was projected at 0.00 total hours.</li>
+        <li><strong>Action:</strong> AI orchestration completed the same work in 0.00 actual hours.</li>
+        <li><strong>Result:</strong> Net savings: 0.00 hours with a 0.00% latency reduction.</li>
+      </ol>
+    </section>
+
   </main>
 
   <script>
@@ -99,6 +169,7 @@
     const projectedHours = [];
     const actualHours = [];
     const totalSavedHours = 0;
+    const starMetrics = {"projects_count": 0, "tasks_count": 0, "projected_total": 0, "actual_total": 0, "saved_total": 0, "reduction_pct": 0.0, "situation_text": "0 live projects and 0 tracked tasks required a measurable efficiency baseline.", "task_text": "Manual execution was projected at 0.00 total hours.", "action_text": "AI orchestration completed the same work in 0.00 actual hours.", "result_text": "Net savings: 0.00 hours with a 0.00% latency reduction."};
 
     const ticker = document.getElementById("hoursSavedTicker");
     const durationMs = 1600;
@@ -113,6 +184,11 @@
     }
 
     requestAnimationFrame(updateTicker);
+
+    document.getElementById("projectsCount").textContent = starMetrics.projects_count;
+    document.getElementById("projectedTotal").textContent = `${starMetrics.projected_total.toFixed(2)}h`;
+    document.getElementById("aiActualTotal").textContent = `${starMetrics.actual_total.toFixed(2)}h`;
+    document.getElementById("latencyReduction").textContent = `${starMetrics.reduction_pct.toFixed(2)}%`;
 
     new Chart(document.getElementById("impactChart"), {
       type: "bar",
