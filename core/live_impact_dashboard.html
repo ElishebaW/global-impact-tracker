@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Impact Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #1d2433;
+      --accent: #0a84ff;
+      --accent-2: #17b26a;
+      --muted: #5f6b85;
+      --line: #dbe2f0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top right, #e7f0ff 0%, var(--bg) 45%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(18, 34, 66, 0.07);
+    }
+
+    .kicker {
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      margin: 0 0 6px;
+    }
+
+    .ticker {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--accent-2);
+      margin: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2vw, 2rem);
+    }
+
+    p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    #chartWrap {
+      height: min(58vh, 420px);
+    }
+
+    canvas { max-height: 100%; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="panel">
+      <p class="kicker">Total Hours Saved</p>
+      <p class="ticker" id="hoursSavedTicker">0.00 hours</p>
+      <p>Calculated as projected manual hours minus actual AI-orchestrated execution hours.</p>
+    </section>
+
+    <section class="panel">
+      <h1>Projected Manual vs Actual AI-Orchestrated Hours</h1>
+      <p>Bar chart by project based on logged execution history.</p>
+      <div id="chartWrap">
+        <canvas id="impactChart" aria-label="Impact comparison chart"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const labels = [];
+    const projectedHours = [];
+    const actualHours = [];
+    const totalSavedHours = 0;
+
+    const ticker = document.getElementById("hoursSavedTicker");
+    const durationMs = 1600;
+    const startTime = performance.now();
+
+    function updateTicker(now) {
+      const t = Math.min((now - startTime) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = totalSavedHours * eased;
+      ticker.textContent = `${value.toFixed(2)} hours`;
+      if (t < 1) requestAnimationFrame(updateTicker);
+    }
+
+    requestAnimationFrame(updateTicker);
+
+    new Chart(document.getElementById("impactChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Projected Manual Hours",
+            data: projectedHours,
+            backgroundColor: "rgba(10, 132, 255, 0.75)",
+            borderColor: "rgba(10, 132, 255, 1)",
+            borderWidth: 1,
+            borderRadius: 8
+          },
+          {
+            label: "Actual AI-Orchestrated Hours",
+            data: actualHours,
+            backgroundColor: "rgba(23, 178, 106, 0.75)",
+            borderColor: "rgba(23, 178, 106, 1)",
+            borderWidth: 1,
+            borderRadius: 8
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value) => `${value}h`
+            },
+            title: {
+              display: true,
+              text: "Hours"
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
