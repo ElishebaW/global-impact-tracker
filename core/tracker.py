@@ -9,6 +9,20 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 
+def _sanitize_csv_field(value: str | None) -> str | None:
+    """Prefix formula-triggering characters to prevent CSV injection.
+
+    Spreadsheet apps (Excel, Google Sheets) interpret cells starting with
+    =, @, +, or - as formulas. Prefixing with a tab neutralizes this while
+    keeping the value human-readable in plain text.
+    """
+    if not isinstance(value, str):
+        return value
+    if value and value[0] in ("=", "@", "+", "-"):
+        return "\t" + value
+    return value
+
+
 class GlobalImpactTracker:
     def __init__(self):
         # Hidden home folder for persistent, cross-project tracking.
@@ -42,7 +56,14 @@ class GlobalImpactTracker:
         timestamp = datetime.now().strftime("%Y-%m-%d")
         with open(self.log_file, "a", newline="", encoding="utf-8") as handle:
             writer = csv.writer(handle)
-            writer.writerow([timestamp, project, task, round(baseline_hrs, 4), round(ai_sec, 4), status])
+            writer.writerow([
+                timestamp,
+                _sanitize_csv_field(project),
+                _sanitize_csv_field(task),
+                round(baseline_hrs, 4),
+                round(ai_sec, 4),
+                _sanitize_csv_field(status),
+            ])
 
     def get_total_savings(self) -> float:
         """Projected manual hours minus actual AI hours."""
