@@ -1,2 +1,4 @@
 mcp
-google-generativeai
+google-genai
+pandas
+matplotlib
