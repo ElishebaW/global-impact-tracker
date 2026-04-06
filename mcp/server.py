@@ -88,7 +88,7 @@ def log_task(
         if not GEMINI_API_KEY or not is_pro():
             return (
                 "Pro tier required for AI estimation. Provide baseline_hours and "
-                "ai_seconds manually, or upgrade at https://buy.stripe.com/YOUR_LINK"
+                "ai_seconds manually, or upgrade at https://buy.stripe.com/eVqcN45Xg2iJ3VXaFM0Ny03"
             )
         estimates = _estimate_with_gemini(task, context)
         baseline_hours = baseline_hours or estimates["baseline_hours"]
@@ -172,7 +172,7 @@ def generate_star_story(audience: str = "self") -> str:
             f"**Result:** Saved {hours_saved:.1f} hours ({rate:.0f}% latency reduction) vs "
             f"manual baseline.\n\n"
             f"Upgrade to Pro for a Gemini-generated narrative tailored to your audience: "
-            f"https://buy.stripe.com/YOUR_LINK"
+            f"https://buy.stripe.com/eVqcN45Xg2iJ3VXaFM0Ny03"
         )
 
     tone_directive = {
