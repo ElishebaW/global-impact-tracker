@@ -6,11 +6,25 @@ from pathlib import Path
 import google.generativeai as genai
 from mcp.server.fastmcp import FastMCP
 
-# Path must be set before local import
-sys.path.insert(0, os.environ.get(
+# Validate and insert IMPACT_TRACKER_PATH before local import
+_tracker_path = os.environ.get(
     "IMPACT_TRACKER_PATH",
-    str(Path(__file__).parent.parent / "global_impact_tracker/orchestration_insights/app")
-))
+    str(Path(__file__).parent.parent / "core")
+)
+_tracker_path_obj = Path(_tracker_path).resolve()
+
+if not _tracker_path_obj.is_dir():
+    raise RuntimeError(
+        f"IMPACT_TRACKER_PATH is not a valid directory: {_tracker_path_obj}\n"
+        "Check your mcp_config.json env block."
+    )
+if not (_tracker_path_obj / "tracker.py").exists():
+    raise RuntimeError(
+        f"tracker.py not found in IMPACT_TRACKER_PATH: {_tracker_path_obj}\n"
+        "Ensure IMPACT_TRACKER_PATH points to the core/ directory."
+    )
+
+sys.path.insert(0, str(_tracker_path_obj))
 
 from tracker import GlobalImpactTracker  # noqa: E402
 
