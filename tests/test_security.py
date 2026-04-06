@@ -14,6 +14,7 @@ from tracker import GlobalImpactTracker, _sanitize_csv_field
 # ── CSV injection sanitization ────────────────────────────────────────────────
 
 class TestSanitizeCsvField:
+    # Standard formula prefixes
     def test_formula_prefix_equals(self):
         assert _sanitize_csv_field("=SUM(A1)").startswith("\t")
 
@@ -26,6 +27,30 @@ class TestSanitizeCsvField:
     def test_formula_prefix_minus(self):
         assert _sanitize_csv_field("-1234").startswith("\t")
 
+    # Whitespace control characters (OWASP: tab 0x09, CR 0x0D, LF 0x0A)
+    def test_formula_prefix_tab(self):
+        assert _sanitize_csv_field("\t=hidden formula").startswith("\t\t")
+
+    def test_formula_prefix_carriage_return(self):
+        assert _sanitize_csv_field("\r=hidden").startswith("\t")
+
+    def test_formula_prefix_line_feed(self):
+        assert _sanitize_csv_field("\n=hidden").startswith("\t")
+
+    # Full-width Unicode variants (OWASP: Japanese locale attacks)
+    def test_formula_prefix_fullwidth_equals(self):
+        assert _sanitize_csv_field("＝SUM(A1)").startswith("\t")
+
+    def test_formula_prefix_fullwidth_plus(self):
+        assert _sanitize_csv_field("＋value").startswith("\t")
+
+    def test_formula_prefix_fullwidth_minus(self):
+        assert _sanitize_csv_field("－value").startswith("\t")
+
+    def test_formula_prefix_fullwidth_at(self):
+        assert _sanitize_csv_field("＠user").startswith("\t")
+
+    # Safe values
     def test_safe_string_unchanged(self):
         assert _sanitize_csv_field("normal task description") == "normal task description"
 

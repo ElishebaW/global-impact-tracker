@@ -9,18 +9,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 
-def _sanitize_csv_field(value: str | None) -> str | None:
-    """Prefix formula-triggering characters to prevent CSV injection.
+# Full set of formula-initiating characters per OWASP CSV Injection:
+# https://owasp.org/www-community/attacks/CSV_Injection
+# Covers =, +, -, @, tab, CR, LF, and full-width Unicode variants.
+_FORMULA_PREFIXES = frozenset("=+-@\t\r\n＝＋－＠")
 
-    Spreadsheet apps (Excel, Google Sheets) interpret cells starting with
-    =, @, +, or - as formulas. Prefixing with a tab neutralizes this while
-    keeping the value human-readable in plain text.
-    """
-    if not isinstance(value, str):
-        return value
-    if value and value[0] in ("=", "@", "+", "-"):
-        return "\t" + value
-    return value
+
+def _sanitize_csv_field(value: str | None) -> str | None:
+    """Prefix formula-triggering characters to prevent CSV injection."""
+    return ("\t" + value) if (isinstance(value, str) and value and value[0] in _FORMULA_PREFIXES) else value
 
 
 class GlobalImpactTracker:
