@@ -3,7 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-import google.generativeai as genai
+from google import genai as genai_sdk
 from mcp.server.fastmcp import FastMCP
 
 # Validate and insert IMPACT_TRACKER_PATH before local import
@@ -33,13 +33,11 @@ mcp = FastMCP("global-impact-tracker")
 tracker = GlobalImpactTracker()
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+_genai_client = genai_sdk.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 
 def _estimate_with_gemini(task: str, context: str) -> dict:
     """Call Gemini 2.5 Flash to estimate baseline hours and AI seconds from task context."""
-    model = genai.GenerativeModel("gemini-2.5-flash")
     prompt = f"""You are estimating engineering productivity metrics.
 
 Task: {task}
@@ -52,7 +50,10 @@ Estimate:
 Respond with ONLY valid JSON, no markdown:
 {{"baseline_hours": <float>, "ai_seconds": <float>, "reasoning": "<one sentence>"}}"""
 
-    response = model.generate_content(prompt)
+    response = _genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
     return json.loads(response.text.strip())
 
 
@@ -121,7 +122,6 @@ def get_dashboard_data() -> dict:
 def generate_star_story() -> str:
     """Generate a formatted STAR narrative from live tracker data using Gemini."""
     snap = tracker.capture_metrics_snapshot()
-
     dashboard = get_dashboard_data()
 
     if not GEMINI_API_KEY:
@@ -142,7 +142,6 @@ def generate_star_story() -> str:
             f"manual baseline."
         )
 
-    model = genai.GenerativeModel("gemini-2.5-flash")
     prompt = f"""You are writing a STAR format performance story for an engineer's self-review.
 
 Metrics snapshot:
@@ -154,7 +153,10 @@ Project breakdown:
 Write a compelling, specific STAR story (Situation, Task, Action, Result) using the real numbers above.
 Keep it under 200 words. Use bold headers for each section. Lead with impact."""
 
-    response = model.generate_content(prompt)
+    response = _genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
     return response.text.strip()
 
 
