@@ -174,9 +174,7 @@ def generate_star_story(audience: str = "self") -> str:
         "recruiter": "Write punchy and metrics-forward. Lead with numbers. Optimized for a resume or LinkedIn summary.",
     }.get(audience, "Write conversationally for a self-review or personal reflection.")
 
-    prompt = f"""You are writing a STAR format performance story for an engineer.
-
-Audience: {audience}
+    prompt = f"""Audience: {audience}
 Tone directive: {tone_directive}
 
 Metrics snapshot:
@@ -191,6 +189,15 @@ Keep it under 200 words. Use bold headers for each section. Lead with impact."""
     response = _genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
+        config=genai_types.GenerateContentConfig(
+            temperature=0.7,
+            top_p=0.95,
+            max_output_tokens=512,
+            system_instruction=(
+                "You are a technical writing assistant specializing in engineer performance narratives. "
+                "Always use the exact numbers provided. Never fabricate metrics."
+            ),
+        ),
     )
     return response.text.strip()
 
