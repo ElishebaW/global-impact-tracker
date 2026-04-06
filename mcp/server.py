@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from google import genai as genai_sdk
+from google.genai import types as genai_types
 from mcp.server.fastmcp import FastMCP
 
 # Validate and insert IMPACT_TRACKER_PATH before local import
@@ -47,14 +48,18 @@ Estimate:
 1. baseline_hours: How many hours a senior engineer would take to do this manually (be realistic)
 2. ai_seconds: How many seconds an AI assistant likely took based on the context described
 
-Respond with ONLY valid JSON, no markdown:
-{{"baseline_hours": <float>, "ai_seconds": <float>, "reasoning": "<one sentence>"}}"""
+Return JSON with keys: baseline_hours (float), ai_seconds (float), reasoning (string, one sentence)."""
 
     response = _genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
+        config=genai_types.GenerateContentConfig(
+            temperature=0.2,
+            max_output_tokens=256,
+            response_mime_type="application/json",
+        ),
     )
-    return json.loads(response.text.strip())
+    return json.loads(response.text)
 
 
 @mcp.tool()
