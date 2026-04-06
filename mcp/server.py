@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from google import genai as genai_sdk
+from google.genai import types as genai_types
 from mcp.server.fastmcp import FastMCP
 
 # Validate and insert IMPACT_TRACKER_PATH before local import
@@ -47,14 +48,18 @@ Estimate:
 1. baseline_hours: How many hours a senior engineer would take to do this manually (be realistic)
 2. ai_seconds: How many seconds an AI assistant likely took based on the context described
 
-Respond with ONLY valid JSON, no markdown:
-{{"baseline_hours": <float>, "ai_seconds": <float>, "reasoning": "<one sentence>"}}"""
+Return JSON with keys: baseline_hours (float), ai_seconds (float), reasoning (string, one sentence)."""
 
     response = _genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
+        config=genai_types.GenerateContentConfig(
+            temperature=0.2,
+            max_output_tokens=256,
+            response_mime_type="application/json",
+        ),
     )
-    return json.loads(response.text.strip())
+    return json.loads(response.text)
 
 
 @mcp.tool()
@@ -65,9 +70,18 @@ def log_task(
     status: str = "Success",
     baseline_hours: float = None,
     ai_seconds: float = None,
+    task_type: str = None,
+    complexity: str = None,
+    tools_used: str = None,
+    dollars_saved: float = None,
+    audience: str = None,
+    token_usage: int = None,
 ) -> str:
     """Log a completed task. Provide project, task description, and context of what happened.
-    If baseline_hours and ai_seconds are not provided, Gemini will estimate them from context."""
+    If baseline_hours and ai_seconds are not provided, Gemini will estimate them from context.
+    Optional: task_type (feature|bug|refactor|review), complexity (low|medium|high),
+    tools_used (pipe-separated e.g. claude|windsurf), dollars_saved (override auto-compute),
+    audience (self|manager|recruiter), token_usage (LLM tokens consumed)."""
 
     if baseline_hours is None or ai_seconds is None:
         if not GEMINI_API_KEY:
@@ -79,7 +93,19 @@ def log_task(
     else:
         reasoning = "Manual override — values provided directly."
 
-    tracker.log_impact(project, task, baseline_hours, ai_seconds, status)
+    tracker.log_impact(
+        project,
+        task,
+        baseline_hours,
+        ai_seconds,
+        status,
+        task_type=task_type,
+        complexity=complexity,
+        tools_used=tools_used,
+        dollars_saved=dollars_saved,
+        audience=audience,
+        token_usage=token_usage,
+    )
 
     return (
         f"Logged: [{project}] {task}\n"
@@ -119,8 +145,9 @@ def get_dashboard_data() -> dict:
 
 
 @mcp.tool()
-def generate_star_story() -> str:
-    """Generate a formatted STAR narrative from live tracker data using Gemini."""
+def generate_star_story(audience: str = "self") -> str:
+    """Generate a formatted STAR narrative from live tracker data using Gemini.
+    audience: 'self' (default), 'manager' (formal, outcome-focused), or 'recruiter' (punchy, metrics-forward)."""
     snap = tracker.capture_metrics_snapshot()
     dashboard = get_dashboard_data()
 
@@ -142,7 +169,13 @@ def generate_star_story() -> str:
             f"manual baseline."
         )
 
-    prompt = f"""You are writing a STAR format performance story for an engineer's self-review.
+    tone_directive = {
+        "manager": "Write formally. Emphasize business outcomes, reliability, and team impact. Avoid jargon.",
+        "recruiter": "Write punchy and metrics-forward. Lead with numbers. Optimized for a resume or LinkedIn summary.",
+    }.get(audience, "Write conversationally for a self-review or personal reflection.")
+
+    prompt = f"""Audience: {audience}
+Tone directive: {tone_directive}
 
 Metrics snapshot:
 {json.dumps(snap, indent=2)}
@@ -156,6 +189,15 @@ Keep it under 200 words. Use bold headers for each section. Lead with impact."""
     response = _genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
+        config=genai_types.GenerateContentConfig(
+            temperature=0.7,
+            top_p=0.95,
+            max_output_tokens=512,
+            system_instruction=(
+                "You are a technical writing assistant specializing in engineer performance narratives. "
+                "Always use the exact numbers provided. Never fabricate metrics."
+            ),
+        ),
     )
     return response.text.strip()
 

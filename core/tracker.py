@@ -8,6 +8,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from config import CSV_COLUMNS, DEFAULT_HOURLY_RATE, MASTER_CSV_PATH
 
 # Full set of formula-initiating characters per OWASP CSV Injection:
 # https://owasp.org/www-community/attacks/CSV_Injection
@@ -22,10 +23,9 @@ def _sanitize_csv_field(value: str | None) -> str | None:
 
 class GlobalImpactTracker:
     def __init__(self):
-        # Hidden home folder for persistent, cross-project tracking.
-        self.log_dir = Path.home() / ".impact_tracker"
+        self.log_file = MASTER_CSV_PATH
+        self.log_dir = self.log_file.parent
         self.log_dir.mkdir(exist_ok=True)
-        self.log_file = self.log_dir / "global_productivity.csv"
         self.metrics_file = self.log_dir / "metrics_snapshot.json"
         self._ensure_log_exists()
 
@@ -33,7 +33,7 @@ class GlobalImpactTracker:
         if not self.log_file.exists():
             with open(self.log_file, "w", newline="", encoding="utf-8") as handle:
                 writer = csv.writer(handle)
-                writer.writerow(["Date", "Project", "Task", "Human_Baseline_Hrs", "AI_Sec", "Status"])
+                writer.writerow(CSV_COLUMNS)
 
     @staticmethod
     def _to_float(value: str | float | int | None) -> float:
@@ -48,9 +48,30 @@ class GlobalImpactTracker:
         with open(self.log_file, "r", newline="", encoding="utf-8") as handle:
             return list(csv.DictReader(handle))
 
-    def log_impact(self, project: str, task: str, baseline_hrs: float, ai_sec: float, status: str = "Success"):
-        """Log one orchestrated task with explicit runtime."""
+    def log_impact(
+        self,
+        project: str,
+        task: str,
+        baseline_hrs: float,
+        ai_sec: float,
+        status: str = "Success",
+        *,
+        task_type: str | None = None,
+        complexity: str | None = None,
+        tools_used: str | None = None,
+        dollars_saved: float | None = None,
+        audience: str | None = None,
+        token_usage: int | None = None,
+    ) -> None:
+        """Log one orchestrated task. New keyword-only args are all nullable.
+        dollars_saved is auto-computed from hours_saved * DEFAULT_HOURLY_RATE
+        when not supplied directly."""
         timestamp = datetime.now().strftime("%Y-%m-%d")
+
+        if dollars_saved is None:
+            hours_saved = max(baseline_hrs - (ai_sec / 3600.0), 0.0)
+            dollars_saved = round(hours_saved * DEFAULT_HOURLY_RATE, 2)
+
         with open(self.log_file, "a", newline="", encoding="utf-8") as handle:
             writer = csv.writer(handle)
             writer.writerow([
@@ -60,6 +81,12 @@ class GlobalImpactTracker:
                 round(baseline_hrs, 4),
                 round(ai_sec, 4),
                 _sanitize_csv_field(status),
+                _sanitize_csv_field(task_type),
+                _sanitize_csv_field(complexity),
+                _sanitize_csv_field(tools_used),
+                dollars_saved,
+                _sanitize_csv_field(audience),
+                token_usage,
             ])
 
     def get_total_savings(self) -> float:
@@ -127,11 +154,23 @@ def _build_cli() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     log_parser = subparsers.add_parser("log", help="Log one orchestration run")
-    log_parser.add_argument("--project", required=True, help="Project name")
-    log_parser.add_argument("--task", required=True, help="Task description")
-    log_parser.add_argument("--baseline-hrs", type=float, required=True, help="Estimated manual hours")
-    log_parser.add_argument("--ai-sec", type=float, required=True, help="Actual AI runtime in seconds")
-    log_parser.add_argument("--status", default="Success", help="Run status (Success/Failed/etc.)")
+    log_parser.add_argument("--project", required=True)
+    log_parser.add_argument("--task", required=True)
+    log_parser.add_argument("--baseline-hrs", type=float, required=True)
+    log_parser.add_argument("--ai-sec", type=float, required=True)
+    log_parser.add_argument("--status", default="Success")
+    log_parser.add_argument("--task-type", default=None,
+                            help="feature | bug | refactor | review")
+    log_parser.add_argument("--complexity", default=None,
+                            help="low | medium | high")
+    log_parser.add_argument("--tools-used", default=None,
+                            help="Pipe-separated: claude|windsurf|gemini")
+    log_parser.add_argument("--dollars-saved", type=float, default=None,
+                            help="Override auto-computed value")
+    log_parser.add_argument("--audience", default=None,
+                            help="self | manager | recruiter")
+    log_parser.add_argument("--token-usage", type=int, default=None,
+                            help="LLM tokens consumed")
 
     subparsers.add_parser("metrics", help="Capture and print JSON metrics snapshot")
     return parser
@@ -148,6 +187,12 @@ def main() -> None:
             baseline_hrs=args.baseline_hrs,
             ai_sec=args.ai_sec,
             status=args.status,
+            task_type=args.task_type,
+            complexity=args.complexity,
+            tools_used=args.tools_used,
+            dollars_saved=args.dollars_saved,
+            audience=args.audience,
+            token_usage=args.token_usage,
         )
         print(f"Logged run to: {tracker.log_file}")
         return
