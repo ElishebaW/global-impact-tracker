@@ -28,6 +28,7 @@ if not (_tracker_path_obj / "tracker.py").exists():
 sys.path.insert(0, str(_tracker_path_obj))
 
 from tracker import GlobalImpactTracker  # noqa: E402
+from entitlements import is_pro  # noqa: E402
 
 # Init
 mcp = FastMCP("global-impact-tracker")
@@ -84,8 +85,11 @@ def log_task(
     audience (self|manager|recruiter), token_usage (LLM tokens consumed)."""
 
     if baseline_hours is None or ai_seconds is None:
-        if not GEMINI_API_KEY:
-            return "Error: GEMINI_API_KEY not set and no baseline_hours/ai_seconds provided."
+        if not GEMINI_API_KEY or not is_pro():
+            return (
+                "Pro tier required for AI estimation. Provide baseline_hours and "
+                "ai_seconds manually, or upgrade at https://buy.stripe.com/eVqcN45Xg2iJ3VXaFM0Ny03"
+            )
         estimates = _estimate_with_gemini(task, context)
         baseline_hours = baseline_hours or estimates["baseline_hours"]
         ai_seconds = ai_seconds or estimates["ai_seconds"]
@@ -151,14 +155,14 @@ def generate_star_story(audience: str = "self") -> str:
     snap = tracker.capture_metrics_snapshot()
     dashboard = get_dashboard_data()
 
-    if not GEMINI_API_KEY:
+    if not GEMINI_API_KEY or not is_pro():
         hours_saved = snap.get("total_hours_saved", 0)
         projects = snap.get("projects_count", 0)
         tasks = snap.get("queries_processed", 0)
         rate = snap.get("latency_reduction_pct", 0)
 
         return (
-            f"**STAR Impact Story**\n"
+            f"**STAR Impact Story** _(free tier — upgrade for AI-generated narrative)_\n\n"
             f"**Situation:** Engineering workflows required significant manual effort across "
             f"{projects} active projects.\n"
             f"**Task:** Reduce time-to-delivery by integrating AI orchestration into the "
@@ -166,7 +170,9 @@ def generate_star_story(audience: str = "self") -> str:
             f"**Action:** Logged {tasks} AI-assisted tasks, replacing manual execution with "
             f"automated AI pipelines tracked in real time.\n"
             f"**Result:** Saved {hours_saved:.1f} hours ({rate:.0f}% latency reduction) vs "
-            f"manual baseline."
+            f"manual baseline.\n\n"
+            f"Upgrade to Pro for a Gemini-generated narrative tailored to your audience: "
+            f"https://buy.stripe.com/eVqcN45Xg2iJ3VXaFM0Ny03"
         )
 
     tone_directive = {
