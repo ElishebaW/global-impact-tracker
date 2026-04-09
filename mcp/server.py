@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 from google import genai as genai_sdk
@@ -37,9 +38,36 @@ tracker = GlobalImpactTracker()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 _genai_client = genai_sdk.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
+_PRIMARY_MODEL = "gemini-2.5-flash"
+_FALLBACK_MODEL = "gemini-2.0-flash"
+_TRANSIENT_CODES = ("503", "429", "500", "UNAVAILABLE", "RESOURCE_EXHAUSTED")
+
+
+def _generate_with_retry(contents: str, config: "genai_types.GenerateContentConfig", retries: int = 3, backoff: float = 2.0) -> str:
+    """Call Gemini with exponential backoff. Falls back to gemini-2.0-flash on persistent transient errors."""
+    for model_name in (_PRIMARY_MODEL, _FALLBACK_MODEL):
+        last_err = None
+        for attempt in range(retries):
+            try:
+                response = _genai_client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                    config=config,
+                )
+                return response.text
+            except Exception as e:
+                last_err = e
+                if any(code in str(e) for code in _TRANSIENT_CODES):
+                    if attempt < retries - 1:
+                        time.sleep(backoff * (2 ** attempt))
+                        continue
+                    break  # retries exhausted — try fallback model
+                raise  # non-transient error — propagate immediately
+    raise last_err
+
 
 def _estimate_with_gemini(task: str, context: str) -> dict:
-    """Call Gemini 2.5 Flash to estimate baseline hours and AI seconds from task context."""
+    """Call Gemini to estimate baseline hours and AI seconds from task context."""
     prompt = f"""You are estimating engineering productivity metrics.
 
 Task: {task}
@@ -51,8 +79,7 @@ Estimate:
 
 Return JSON with keys: baseline_hours (float), ai_seconds (float), reasoning (string, one sentence)."""
 
-    response = _genai_client.models.generate_content(
-        model="gemini-2.5-flash",
+    text = _generate_with_retry(
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.2,
@@ -60,7 +87,7 @@ Return JSON with keys: baseline_hours (float), ai_seconds (float), reasoning (st
             response_mime_type="application/json",
         ),
     )
-    return json.loads(response.text)
+    return json.loads(text)
 
 
 @mcp.tool()
@@ -190,10 +217,9 @@ Project breakdown:
 {json.dumps(dashboard, indent=2)}
 
 Write a compelling, specific STAR story (Situation, Task, Action, Result) using the real numbers above.
-Keep it under 200 words. Use bold headers for each section. Lead with impact."""
+Aim for 300-400 words — complete and specific, not truncated. Use bold headers for each section. Lead with impact."""
 
-    response = _genai_client.models.generate_content(
-        model="gemini-2.5-flash",
+    return _generate_with_retry(
         contents=prompt,
         config=genai_types.GenerateContentConfig(
             temperature=0.7,
@@ -204,8 +230,7 @@ Keep it under 200 words. Use bold headers for each section. Lead with impact."""
                 "Always use the exact numbers provided. Never fabricate metrics."
             ),
         ),
-    )
-    return response.text.strip()
+    ).strip()
 
 
 if __name__ == "__main__":
