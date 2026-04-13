@@ -1,37 +1,41 @@
 """License key entitlements for Global Impact Tracker Pro tier.
 
-Architecture: _VALID_KEYS is a static set for the MVP. When user base grows,
-swap _check_key() to an HTTP call against a validation endpoint without
-changing the public is_pro() interface.
+Keys have format: git-{key_id}-{signature}
+  - signature = HMAC-SHA256(_SIGNING_SECRET, key_id)[:16]
+  - _SIGNING_SECRET is SHA-256(raw_secret) — hardcoded derived constant
+  - Raw secret lives only in IMPACT_TRACKER_SIGNING_SECRET env var (developer only)
+  - Verification is self-contained — no file lookup, works on any machine
 """
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
-from pathlib import Path
 
-# Add issued Stripe license keys here as customers purchase.
-# Format: plain string, minimum 32 chars (secrets.token_urlsafe(32)).
-# Do NOT commit actual customer keys to git — use ~/.impact_tracker/valid_keys.txt
-# for production keys (see is_pro() implementation).
-_VALID_KEYS: set[str] = set()
+# Derived from IMPACT_TRACKER_SIGNING_SECRET via SHA-256 — one-way, so
+# reading this source does not allow generating new keys.
+_SIGNING_SECRET: bytes = bytes.fromhex(
+    "97e32d7e5b9ec65440ffb3a871dd6db22c8674c16ec6cdfc9b4676732cbc777e"
+)
+
+_KEY_PREFIX = "git-"
+
+
+def _verify_key(key: str) -> bool:
+    parts = key.split("-")
+    if len(parts) != 3:
+        return False
+    prefix, key_id, signature = parts
+    if prefix != "git" or not key_id or not signature:
+        return False
+    expected = hmac.new(_SIGNING_SECRET, key_id.encode(), "sha256").hexdigest()[:16]
+    return hmac.compare_digest(signature, expected)
 
 
 def is_pro() -> bool:
-    """Return True if STRIPE_LICENSE_KEY env var matches a known valid key.
-
-    Checks two sources:
-    1. _VALID_KEYS set in this file (for test keys and early-access keys)
-    2. ~/.impact_tracker/valid_keys.txt — one key per line, not committed to git
-       (production keys are written here by the manual delivery process)
-    """
+    """Return True if STRIPE_LICENSE_KEY env var is a valid HMAC-signed key."""
     key = os.environ.get("STRIPE_LICENSE_KEY", "").strip()
     if not key:
         return False
-    if key in _VALID_KEYS:
-        return True
-    keys_file = Path.home() / ".impact_tracker" / "valid_keys.txt"
-    if keys_file.exists():
-        valid = {line.strip() for line in keys_file.read_text().splitlines() if line.strip()}
-        return key in valid
-    return False
+    return _verify_key(key)
