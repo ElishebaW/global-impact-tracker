@@ -45,6 +45,17 @@ Add to your client's MCP config file:
 |----------|----------|-------------|
 | `IMPACT_TRACKER_PATH` | Yes | Absolute path to `global_impact_tracker/orchestration_insights/app` |
 | `GEMINI_API_KEY` | Recommended | Gemini API key for AI estimation. If omitted, `baseline_hours` and `ai_seconds` must be passed manually to `log_task`, and `generate_star_story` falls back to a template. |
+| `IMPACT_TRACKER_LICENSE_KEY` | Optional | Signed Pro key for paid MCP flows, in the format `gip-{customer_id}-{expiry_yyyymmdd}-{64-char-hmac}`. |
+
+## Pro Licensing
+
+Paid MCP features use portable HMAC-signed license keys. Free CLI usage remains available without a Pro key.
+
+- Customer-facing env var: `IMPACT_TRACKER_LICENSE_KEY`
+- Production key format: `gip-{customer_id}-{expiry_yyyymmdd}-{signature}`
+- Signature format: full HMAC-SHA256 output as 64 lowercase hex characters
+- Developer-only env var for private key generation: `IMPACT_TRACKER_SIGNING_SECRET`
+- Repo split requirement: `_SIGNING_KEY` in `core/entitlements.py` must stay a placeholder in any public-facing commit; the real value belongs only in the private repo
 
 ## Tools
 
