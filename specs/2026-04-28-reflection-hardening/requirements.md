@@ -20,7 +20,7 @@ Harden the private MCP repo's reflection features so that:
 
 - Retry logic with exponential backoff on all Gemini API calls
 - Error handling that surfaces clear messages when Gemini is unavailable
-- Promptfoo eval suite using deterministic assertions for STAR narrative accuracy
+- Objective eval coverage written in pytest: verify narrative grounding, retry behavior, and error surfaces
 - Integration test coverage for the full reflection flow end to end
 
 ## Out of Scope
@@ -29,7 +29,7 @@ Harden the private MCP repo's reflection features so that:
 - New product features beyond hardening existing reflection behavior
 - Storage changes (CSV remains the source of truth)
 - Phase 4 tool exposure
-- LLM-as-judge evaluation (deferred to Phase 4 — see note below)
+- Promptfoo evals (deferred to Phase 4 — subjective quality evaluation requires an LLM judge)
 
 ## Constraints
 
@@ -41,7 +41,8 @@ Harden the private MCP repo's reflection features so that:
 ## Decisions
 
 - Phase 3 is private repo only; public package is not modified
-- Eval assertions are **deterministic** — promptfoo `contains` and regex checks verify that generated narratives reference the correct hours saved, latency reduction percentage, and project/task counts from the input metrics snapshot. No second LLM call is needed for Phase 3's accuracy bar.
+- Eval coverage is **objective and code-written** — pytest assertions verify that `_missing_metrics` catches ungrounded output, retry logic behaves correctly, and both tools surface clear errors on Gemini failure. No LLM call is needed to run the test suite.
+- Promptfoo is Phase 4 only, where subjective narrative quality requires an LLM judge
 - Gemini API failures must surface as clear errors — not silent empty or incorrect output
 - Narrative accuracy and API reliability are co-equal merge gates
 

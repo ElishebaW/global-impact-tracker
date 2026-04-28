@@ -2,9 +2,10 @@
 
 ## Narrative Accuracy
 
-- Promptfoo evals pass: generated STAR narratives contain the correct hours saved, latency reduction percentage, and project/task counts from the input metrics snapshot
-- No generated narrative introduces a value that is absent from the input metrics snapshot
-- Evals run locally without a live Gemini key (fixture-based inputs)
+- Pytest assertions confirm `_missing_metrics` correctly identifies narratives that omit hours saved, latency reduction percentage, project count, or task count
+- Pytest confirms `generate_star_story` retries with a stronger prompt when metrics are missing from the first response
+- Pytest confirms a warning is prepended when metrics are still missing after retry
+- All tests run without a live Gemini key (Gemini calls are stubbed)
 
 ## API Resilience
 
