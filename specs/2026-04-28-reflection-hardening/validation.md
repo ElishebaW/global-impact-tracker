@@ -20,6 +20,5 @@
 
 ## Merge Gate
 
-- All promptfoo evals pass
-- All pytest tests pass
+- All pytest tests pass (17 tests, no live Gemini key required)
 - No public package changes are present on the branch
