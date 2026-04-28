@@ -1,14 +1,9 @@
 """Tests for security hardening — Phase 2.5."""
 
 import csv
-import sys
-import tempfile
 from pathlib import Path
 
-import pytest
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "core"))
-from tracker import GlobalImpactTracker, _sanitize_csv_field
+from global_impact_tracker.tracker import GlobalImpactTracker, _sanitize_csv_field
 
 
 # ── CSV injection sanitization ────────────────────────────────────────────────
@@ -95,20 +90,3 @@ class TestCsvInjectionInLog:
             rows = list(csv.DictReader(f))
         assert rows[0]["Project"] == "my-project"
         assert rows[0]["Task"] == "refactored auth module"
-
-
-# ── IMPACT_TRACKER_PATH validation ────────────────────────────────────────────
-
-class TestTrackerPathValidation:
-    def test_valid_path_with_tracker_py_passes(self, tmp_path):
-        (tmp_path / "tracker.py").write_text("# stub")
-        assert tmp_path.resolve().is_dir()
-        assert (tmp_path.resolve() / "tracker.py").exists()
-
-    def test_nonexistent_path_is_invalid(self, tmp_path):
-        bad_path = tmp_path / "does_not_exist"
-        assert not bad_path.is_dir()
-
-    def test_path_without_tracker_py_is_invalid(self, tmp_path):
-        assert tmp_path.is_dir()
-        assert not (tmp_path / "tracker.py").exists()

@@ -2,7 +2,7 @@
 
 This roadmap reflects the current state of the project: core tracking, MCP integration, and reporting already exist. The next work should be split into very small phases, with licensing and repo separation first.
 
-## Phase 1: HMAC licensing
+## Phase 1: HMAC licensing (Complete)
 
 Consolidates original phases 1 (HMAC licensing), 2 (key generation workflow), and 4 (expiring keys).
 
