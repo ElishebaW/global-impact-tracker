@@ -12,9 +12,8 @@ from unittest import mock
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "core"))
-
-import entitlements
+from global_impact_tracker import entitlements
+from conftest import src_env
 
 
 def _sign(customer_id: str, expiry: str) -> str:
@@ -109,7 +108,7 @@ class TestGenerateKeyScript:
                 "20991231",
             ],
             cwd=Path(__file__).parent.parent,
-            env={**os.environ, "IMPACT_TRACKER_SIGNING_SECRET": "test-signing-secret"},
+            env={**src_env(), "IMPACT_TRACKER_SIGNING_SECRET": "test-signing-secret"},
             check=True,
             capture_output=True,
             text=True,

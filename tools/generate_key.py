@@ -16,6 +16,8 @@ import os
 import re
 import sys
 
+from global_impact_tracker.entitlements import _KEY_PREFIX, _build_payload
+
 
 def _parse_expiry(expiry: str) -> str:
     if not re.fullmatch(r"\d{8}", expiry):
@@ -40,9 +42,9 @@ def main(argv: list[str]) -> int:
         raise SystemExit("IMPACT_TRACKER_SIGNING_SECRET env var is required")
 
     expiry = _parse_expiry(expiry)
-    payload = f"{customer_id}-{expiry}"
+    payload = _build_payload(customer_id, expiry)
     signature = hmac.new(signing_secret.encode(), payload.encode(), "sha256").hexdigest()
-    print(f"gip-{customer_id}-{expiry}-{signature}")
+    print(f"{_KEY_PREFIX}-{customer_id}-{expiry}-{signature}")
     return 0
 
 

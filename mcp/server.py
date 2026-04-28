@@ -1,34 +1,18 @@
 import json
 import os
-import sys
-from pathlib import Path
 
 from google import genai as genai_sdk
 from google.genai import types as genai_types
 from mcp.server.fastmcp import FastMCP
 
-# Validate and insert IMPACT_TRACKER_PATH before local import
-_tracker_path = os.environ.get(
-    "IMPACT_TRACKER_PATH",
-    str(Path(__file__).parent.parent / "core")
-)
-_tracker_path_obj = Path(_tracker_path).resolve()
-
-if not _tracker_path_obj.is_dir():
+try:
+    from global_impact_tracker.entitlements import is_pro
+    from global_impact_tracker.tracker import GlobalImpactTracker
+except ModuleNotFoundError as exc:
     raise RuntimeError(
-        f"IMPACT_TRACKER_PATH is not a valid directory: {_tracker_path_obj}\n"
-        "Check your mcp_config.json env block."
-    )
-if not (_tracker_path_obj / "tracker.py").exists():
-    raise RuntimeError(
-        f"tracker.py not found in IMPACT_TRACKER_PATH: {_tracker_path_obj}\n"
-        "Ensure IMPACT_TRACKER_PATH points to the core/ directory."
-    )
-
-sys.path.insert(0, str(_tracker_path_obj))
-
-from tracker import GlobalImpactTracker  # noqa: E402
-from entitlements import is_pro  # noqa: E402
+        "The public package is not installed. Install it first with `pip install -e .` "
+        "before running the private MCP server."
+    ) from exc
 
 # Init
 mcp = FastMCP("global-impact-tracker")

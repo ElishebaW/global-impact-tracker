@@ -1,12 +1,14 @@
-# Orchestration Insights
+# Core Compatibility Layer
+
+`core/` is now a compatibility shim over the installable `global_impact_tracker` package. The public/shared implementation lives under `src/global_impact_tracker/`.
 
 ## Problem
 Execution data usually lives in scattered notes, ticket comments, and memory. That makes it hard to prove how much time AI orchestration actually saves versus manual delivery.
 
 ## Solution
 This tool creates a single live audit trail for impact:
-- `tracker.py` logs each task with projected manual hours and actual AI runtime.
-- `dashboard.py` converts that log into a live HTML dashboard.
+- `global_impact_tracker.tracker` logs each task with projected manual hours and actual AI runtime.
+- `global_impact_tracker.dashboard` converts that log into a live HTML dashboard.
 - `live_impact_dashboard.html` shows a bar chart, live savings ticker, and STAR-ready metrics.
 
 ## STAR Story Metrics Provided
@@ -23,10 +25,10 @@ The `STAR Story Metrics` panel and narrative are generated from your latest log 
 I built this tool to quantify the transition from manual execution to AI orchestration. It serves as a real-time audit of my efficiency, proving a 90%+ reduction in task latency across multiple live projects.
 
 ## Files
-- `tracker.py`: Core impact logging logic.
-- `config.py`: Global settings.
-- `dashboard.py`: Generates `live_impact_dashboard.html` from log data and STAR metrics.
-- `requirements.txt`: Python dependencies.
+- `tracker.py`: Compatibility wrapper for the public package tracker CLI/module.
+- `config.py`: Compatibility wrapper for public package settings.
+- `dashboard.py`: Compatibility wrapper for dashboard generation.
+- `entitlements.py`: Compatibility wrapper for the placeholder public entitlement interface.
 
 ## Configuration Settings
 
@@ -42,11 +44,11 @@ The GlobalImpactTracker class automatically creates a hidden directory in your h
 
 ### Command Line Interface
 
-Use the `tracker.py` CLI to log orchestration runs:
+Use the installed CLI to log orchestration runs:
 
 #### Log a Task
 ```bash
-python3 tracker.py log --project "Project Name" --task "Task description" --baseline-hrs 2.5 --ai-sec 45.2 --status "Success"
+impact-tracker log --project "Project Name" --task "Task description" --baseline-hrs 2.5 --ai-sec 45.2 --status "Success"
 ```
 
 **Parameters:**
@@ -58,7 +60,7 @@ python3 tracker.py log --project "Project Name" --task "Task description" --base
 
 #### Capture Metrics Snapshot
 ```bash
-python3 tracker.py metrics
+impact-tracker metrics
 ```
 This captures current metrics and saves them to `~/.impact_tracker/metrics_snapshot.json`.
 
@@ -66,13 +68,13 @@ This captures current metrics and saves them to `~/.impact_tracker/metrics_snaps
 
 ```bash
 # Log a successful API integration task
-python3 tracker.py log --project "E-commerce Site" --task "REST API integration" --baseline-hrs 4.0 --ai-sec 120.5
+impact-tracker log --project "E-commerce Site" --task "REST API integration" --baseline-hrs 4.0 --ai-sec 120.5
 
 # Log a failed database migration
-python3 tracker.py log --project "Data Pipeline" --task "Database migration" --baseline-hrs 2.0 --ai-sec 30.0 --status "Failed"
+impact-tracker log --project "Data Pipeline" --task "Database migration" --baseline-hrs 2.0 --ai-sec 30.0 --status "Failed"
 
 # Log quick code generation
-python3 tracker.py log --project "Mobile App" --task "Generate React components" --baseline-hrs 1.5 --ai-sec 15.2
+impact-tracker log --project "Mobile App" --task "Generate React components" --baseline-hrs 1.5 --ai-sec 15.2
 ```
 
 ### Metrics Interpretation
@@ -94,7 +96,6 @@ The metrics snapshot provides the following key metrics:
 
 ## Run
 ```bash
-cd /Users/elishebawiggins/projects/global_impact_tracker/orchestration_insights/app
-python3 dashboard.py
+impact-dashboard
 ```
 Then open `live_impact_dashboard.html` in a browser.

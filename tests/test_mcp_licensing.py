@@ -8,11 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "core"))
-
-from tracker import GlobalImpactTracker
-
-import entitlements
+from global_impact_tracker import entitlements
+from global_impact_tracker.tracker import GlobalImpactTracker
+from conftest import src_env
 
 
 def _make_tracker(tmpdir: Path) -> GlobalImpactTracker:
@@ -37,7 +35,7 @@ def _generate_key(customer_id: str, expiry: str) -> str:
     result = subprocess.run(
         [sys.executable, "tools/generate_key.py", customer_id, expiry],
         cwd=Path(__file__).parent.parent,
-        env={**os.environ, "IMPACT_TRACKER_SIGNING_SECRET": "test-signing-secret"},
+        env={**src_env(), "IMPACT_TRACKER_SIGNING_SECRET": "test-signing-secret"},
         check=True,
         capture_output=True,
         text=True,
@@ -47,7 +45,6 @@ def _generate_key(customer_id: str, expiry: str) -> str:
 
 class TestMcpLicensing:
     def test_paid_log_task_succeeds_with_valid_generated_key(self, monkeypatch, tmp_path):
-        monkeypatch.setenv("IMPACT_TRACKER_PATH", str((Path(__file__).parent.parent / "core").resolve()))
         monkeypatch.setenv("GEMINI_API_KEY", "test-api-key")
         monkeypatch.setenv("IMPACT_TRACKER_LICENSE_KEY", _generate_key("acme", "20991231"))
         monkeypatch.setattr(entitlements, "_SIGNING_KEY", "test-signing-secret")
@@ -66,7 +63,6 @@ class TestMcpLicensing:
         assert "Baseline: 2.5h | AI: 45.0s" in result
 
     def test_paid_log_task_is_blocked_for_invalid_or_expired_key(self, monkeypatch, tmp_path):
-        monkeypatch.setenv("IMPACT_TRACKER_PATH", str((Path(__file__).parent.parent / "core").resolve()))
         monkeypatch.setenv("GEMINI_API_KEY", "test-api-key")
         monkeypatch.setenv("IMPACT_TRACKER_LICENSE_KEY", _generate_key("acme", "20260422"))
         monkeypatch.setattr(entitlements, "_SIGNING_KEY", "test-signing-secret")

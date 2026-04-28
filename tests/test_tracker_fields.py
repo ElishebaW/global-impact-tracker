@@ -1,13 +1,11 @@
 """Tests for Phase 3 — extended nullable fields and Dollars_Saved auto-compute."""
 
 import csv
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "core"))
-from tracker import GlobalImpactTracker
+from global_impact_tracker.tracker import GlobalImpactTracker
 
 
 def _make_tracker(tmpdir: Path) -> GlobalImpactTracker:
