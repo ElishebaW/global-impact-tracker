@@ -45,7 +45,12 @@ global_impact_tracker/
 **Runtime data (outside repo, never committed):**
 - `~/.impact_tracker/global_productivity.csv` — master task log
 - `~/.impact_tracker/metrics_snapshot.json` — latest snapshot
-- `~/.impact_tracker/valid_keys.txt` — Pro license keys (one per line)
+
+**Pro licensing:**
+- Customer-facing env var: `IMPACT_TRACKER_LICENSE_KEY`
+- Key format: `gip-{customer_id}-{expiry_yyyymmdd}-{64-char-hmac}`
+- Developer-only key generation env var: `IMPACT_TRACKER_SIGNING_SECRET`
+- `_SIGNING_KEY` in `core/entitlements.py` must remain a placeholder in any public-facing commit and be replaced only in the private repo
 
 ## MCP Config
 
@@ -59,7 +64,7 @@ Windsurf config at `~/.codeium/windsurf/mcp_config.json`:
       "env": {
         "GEMINI_API_KEY": "<key>",
         "IMPACT_TRACKER_PATH": "/Users/elishebawiggins/projects/global_impact_tracker/core",
-        "STRIPE_LICENSE_KEY": "<pro-key-if-applicable>"
+        "IMPACT_TRACKER_LICENSE_KEY": "<gip-pro-key-if-applicable>"
       }
     }
   }
