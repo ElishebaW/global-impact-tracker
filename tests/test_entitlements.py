@@ -5,15 +5,11 @@ from __future__ import annotations
 import datetime as dt
 import importlib
 import os
-import subprocess
-import sys
-from pathlib import Path
 from unittest import mock
 
 import pytest
 
 from global_impact_tracker import entitlements
-from conftest import src_env
 
 
 def _sign(customer_id: str, expiry: str) -> str:
@@ -96,22 +92,3 @@ class TestIsPro:
     def test_valid_env_var_returns_true(self):
         with mock.patch.dict(os.environ, {"IMPACT_TRACKER_LICENSE_KEY": _sign("acme", "20991231")}):
             assert entitlements.is_pro() is True
-
-
-class TestGenerateKeyScript:
-    def test_generated_key_matches_verifier(self):
-        result = subprocess.run(
-            [
-                sys.executable,
-                "tools/generate_key.py",
-                "acme",
-                "20991231",
-            ],
-            cwd=Path(__file__).parent.parent,
-            env={**src_env(), "IMPACT_TRACKER_SIGNING_SECRET": "test-signing-secret"},
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        key = result.stdout.strip()
-        assert entitlements.verify_license_key(key, today=dt.date(2026, 4, 23)) is True

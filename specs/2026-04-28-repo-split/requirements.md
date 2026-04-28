@@ -10,8 +10,8 @@ This phase should reduce product risk before broader paid distribution while pre
 
 Separate the project into:
 
-- a public repo for shared tracking logic, packaging, documentation, and a CLI entrypoint
-- a private repo for MCP functionality, internal key issuance tooling, real signing-backed entitlements, and paid-only tests
+- a public GitHub repo for shared tracking logic, packaging, documentation, and a CLI entrypoint
+- a private GitHub repo named `global-impact-tracker-mcp` for MCP functionality, internal key issuance tooling, real signing-backed entitlements, and paid-only tests
 
 The split must preserve local development usability and keep both repos runnable.
 
@@ -19,7 +19,7 @@ The split must preserve local development usability and keep both repos runnable
 
 - Move the public product shape to shared `core/` logic plus packaging, docs, and a CLI entrypoint
 - Move non-public functionality into the private repo, including:
-  - `mcp/server.py`
+  - the MCP server
   - internal key issuance tooling such as `tools/generate_key.py`
   - signing-secret-backed entitlement logic
   - paid-only tests

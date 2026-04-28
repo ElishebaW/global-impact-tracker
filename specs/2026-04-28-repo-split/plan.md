@@ -12,6 +12,7 @@
    - Update packaging and documentation for free CLI installation and usage
 
 3. Prepare the private repo shape
+   - Create the private `global-impact-tracker-mcp` repo
    - Move the MCP server, internal key issuance tooling, and paid-only tests into the private layout
    - Wire private code to consume the installed public package
    - Preserve paid entitlement checks and MCP behavior with private signing material

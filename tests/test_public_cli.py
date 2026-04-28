@@ -6,6 +6,7 @@ from pathlib import Path
 
 from conftest import src_env
 
+
 def test_python_module_entrypoint_prints_metrics_snapshot(tmp_path):
     result = subprocess.run(
         [sys.executable, "-m", "global_impact_tracker", "metrics"],

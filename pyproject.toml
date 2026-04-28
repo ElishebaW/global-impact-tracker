@@ -12,7 +12,6 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest"]
-mcp = ["google-genai", "mcp"]
 
 [project.scripts]
 impact-tracker = "global_impact_tracker.tracker:main"

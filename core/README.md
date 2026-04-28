@@ -2,6 +2,8 @@
 
 `core/` is now a compatibility shim over the installable `global_impact_tracker` package. The public/shared implementation lives under `src/global_impact_tracker/`.
 
+Private MCP code and internal key issuance tooling now live in the separate private repo `global-impact-tracker-mcp`.
+
 ## Problem
 Execution data usually lives in scattered notes, ticket comments, and memory. That makes it hard to prove how much time AI orchestration actually saves versus manual delivery.
 

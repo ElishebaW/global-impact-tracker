@@ -1,6 +1,6 @@
 # Global Impact Tracker
 
-Global Impact Tracker is a local-first Python package and CLI for proving the value of AI-assisted work. The public surface is the installable `global_impact_tracker` package. MCP server code and customer key issuance tooling remain non-public/operator-controlled surfaces.
+Global Impact Tracker is a local-first Python package and CLI for proving the value of AI-assisted work. This repository is the public free-tier codebase.
 
 ## Public install
 
@@ -63,30 +63,18 @@ The public package does not ship:
 
 `core/` remains in the repo only as a compatibility shim over the installable package during the split.
 
-## Private development surface
+## Private MCP companion repo
 
-For the current transition state in this repo, a full local development environment can be installed with:
+Paid MCP features, private entitlement verification, and internal customer key issuance live in the separate private repo:
 
-```bash
-pip install -r requirements.txt
-```
+- `global-impact-tracker-mcp`
 
-That installs the public package plus private-repo dependencies used here for MCP and test coverage.
-
-Paid MCP behavior still requires:
-
-- `GEMINI_API_KEY`
-- `IMPACT_TRACKER_LICENSE_KEY`
-
-Internal customer key issuance still requires:
-
-- `IMPACT_TRACKER_SIGNING_SECRET`
+That repo installs this public package as a dependency and should not be shipped in the public GitHub codebase.
 
 ## Licensing boundary
 
-Paid MCP features use portable HMAC-signed license keys.
+The public package keeps the entitlement interface so paid keys can still be validated by private code, but this repo does not ship the MCP server or internal operator tooling.
 
 - Customer env var: `IMPACT_TRACKER_LICENSE_KEY`
 - Key format: `gip-{customer_id}-{expiry_yyyymmdd}-{signature}`
-- Internal signing env var: `IMPACT_TRACKER_SIGNING_SECRET`
 - `_SIGNING_KEY` in the public package remains a placeholder in public-facing commits
