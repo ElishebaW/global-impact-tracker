@@ -14,7 +14,7 @@ Consolidates original phases 1 (HMAC licensing), 2 (key generation workflow), an
 - Add focused tests for valid, invalid, malformed, expired, and missing keys
 - Verify paid MCP gating works with signed keys
 
-## Phase 2: Repo split
+## Phase 2: Repo split (Complete)
 
 Must follow immediately after Phase 1 merges — do not ship the MCP server to customers before this is complete.
 
@@ -37,6 +37,8 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Allow agent workflows to chain metrics into narrative generation
 - Preserve existing MCP behavior while enabling tool-based orchestration
 - Add at least one end-to-end tool-call test
+- Add LLM-as-judge qualitative eval: HuggingFace Inference API as primary critic, graceful degradation to a locally-run Ollama model (e.g., Llama 3 8B) on rate-limit errors
+- Ollama is a required paid-tier install for the fallback eval path; document in paid-tier setup instructions
 
 ## Phase 5: Packaging and polish
 
