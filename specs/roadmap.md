@@ -24,14 +24,14 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Update dependency lists for each repo
 - Confirm the MCP server still loads shared core logic via configured path
 
-## Phase 3: Reflection hardening
+## Phase 3: Reflection hardening (Complete)
 
 - Add validation and retry logic to Gemini estimation
 - Add evaluator checks for STAR story accuracy against live metrics
 - Keep generated narratives grounded in exact numbers
 - Add integration coverage for reflection flows
 
-## Phase 4: Decisions auto-capture
+## Phase 4: Decisions auto-capture (Complete)
 
 - Investigate and fix Claude Code Stop hook not firing reliably (test with actual session exit, verify `transcript_path` is populated, confirm `ANTHROPIC_API_KEY` is available in hook subprocess environment)
 - Harden `hooks/capture_decisions.py`: add stderr logging for silent failures so root cause is visible on next debug
@@ -42,6 +42,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 ## Phase 5: Reflection as tools (previously Phase 4)
 
 - Expose metrics summary and STAR story generation as tool-callable actions
+- Add project-scoped STAR story generation so users can generate a narrative for one specific project instead of only a general cross-project story
 - Allow agent workflows to chain metrics into narrative generation
 - Preserve existing MCP behavior while enabling tool-based orchestration
 - Add at least one end-to-end tool-call test
