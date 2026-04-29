@@ -39,6 +39,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Add at least one end-to-end tool-call test
 - Add LLM-as-judge qualitative eval: HuggingFace Inference API as primary critic, graceful degradation to a locally-run Ollama model (e.g., Llama 3 8B) on rate-limit errors
 - Ollama is a required paid-tier install for the fallback eval path; document in paid-tier setup instructions
+- Benchmark HuggingFace and Ollama eval paths head-to-head: measure latency per eval run for each provider and record results as tracked metrics in the impact tracker itself — this produces concrete data on how much latency AI-assisted eval systems save compared to a manual review baseline
 
 ## Phase 5: Packaging and polish
 
