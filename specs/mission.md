@@ -13,9 +13,11 @@ It should serve four outcomes at the same time:
 
 The product should make it easy to capture completed work, estimate the difference between AI-assisted execution and a plausible manual baseline, and turn that history into usable evidence.
 
+That evidence should support both broad cross-project summaries and project-specific narratives when users need to explain impact in a more focused context.
+
 The free CLI should make individual tracking simple and low-friction.
 
-The paid MCP tool should make tracking feel automatic inside AI-native workflows, with richer reflection and reporting for users who want deeper leverage from their data.
+The paid MCP tool should make tracking feel automatic inside AI-native workflows, with richer reflection and reporting for users who want deeper leverage from their data, including grounded STAR stories and captured engineering decisions.
 
 ## Core principles
 
