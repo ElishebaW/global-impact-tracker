@@ -31,7 +31,15 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Keep generated narratives grounded in exact numbers
 - Add integration coverage for reflection flows
 
-## Phase 4: Reflection as tools
+## Phase 4: Decisions auto-capture
+
+- Investigate and fix Claude Code Stop hook not firing reliably (test with actual session exit, verify `transcript_path` is populated, confirm `ANTHROPIC_API_KEY` is available in hook subprocess environment)
+- Harden `hooks/capture_decisions.py`: add stderr logging for silent failures so root cause is visible on next debug
+- Validate end-to-end: hook fires → transcript read → Claude API called → `~/.impact_tracker/decisions.jsonl` written
+- Surface captured decisions in `generate_star_story` (already wired in `_build_star_prompt`; confirm round-trip works with real data)
+- Add a `get_decisions` MCP tool so decisions log is queryable directly from Claude Code
+
+## Phase 5: Reflection as tools (previously Phase 4)
 
 - Expose metrics summary and STAR story generation as tool-callable actions
 - Allow agent workflows to chain metrics into narrative generation
@@ -40,14 +48,14 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Add LLM-as-judge qualitative eval: HuggingFace Inference API as primary critic, graceful degradation to a locally-run Ollama model (e.g., Llama 3 8B) on rate-limit errors
 - Ollama is a required paid-tier install for the fallback eval path; document in paid-tier setup instructions
 
-## Phase 5: Packaging and polish
+## Phase 6: Packaging and polish
 
 - Package the CLI for pip installation
 - Tighten installation and configuration docs
 - Standardize local setup for free CLI users and paid MCP users
 - Clean up naming and repo-level documentation after the split
 
-## Phase 6: Gemini proxy service
+## Phase 7: Gemini proxy service
 
 - Move Gemini API usage for paid MCP features behind a small hosted proxy
 - Validate Pro keys server-side before forwarding Gemini requests
@@ -59,6 +67,18 @@ Notes for this phase:
 - This work happens after the repo split
 - The proxy should preserve existing paid gating through shared entitlement logic
 - A `PROXY_URL` should replace direct customer-side Gemini configuration for paid flows
+
+## Phase 8: Landing pages (free and paid tiers)
+
+Build a product landing page for Global Impact Tracker modeled after codeguardian.studio — clean, developer-focused, with a clear free vs. paid tier split.
+
+- Design a single-page site with hero, feature breakdown, free vs. paid comparison table, and a CTA for the paid MCP tier
+- Free tier: highlight the CLI, CSV-based tracking, open-source availability
+- Paid tier: highlight MCP server, AI estimation, STAR story generation, decisions capture, and team/enterprise positioning
+- Include a live metrics demo section (animated or static sample numbers showing hours saved, latency reduction)
+- Match the aesthetic of codeguardian.studio: minimal, dark or neutral palette, code-adjacent feel
+- Host on the same domain pattern or a dedicated subdomain (e.g. globalimpacttracker.dev)
+- Tie into the packaging phase — landing page goes live when pip install is ready
 
 ## Sequencing rules
 
