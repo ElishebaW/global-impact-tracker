@@ -18,6 +18,11 @@ core/live_impact_dashboard.html
 core/__pycache__/
 mcp/__pycache__/
 
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
 # IDE
 .vscode/
 .idea/

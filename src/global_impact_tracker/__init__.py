@@ -2,4 +2,5 @@
 
 from .tracker import GlobalImpactTracker
 
-__all__ = ["GlobalImpactTracker"]
+__version__ = "0.1.0"
+__all__ = ["GlobalImpactTracker", "__version__"]
