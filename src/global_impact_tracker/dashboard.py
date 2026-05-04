@@ -261,7 +261,9 @@ def _to_float(value: str | None) -> float:
         return 0.0
 
 
-def _collect_dashboard_data(log_file: Path) -> tuple[list[str], list[float], list[float], float, dict[str, float | int | str]]:
+def _collect_dashboard_data(
+    log_file: Path,
+) -> tuple[list[str], list[float], list[float], float, dict[str, float | int | str]]:
     project_manual = defaultdict(float)
     project_ai = defaultdict(float)
     rows = []
@@ -285,7 +287,9 @@ def _collect_dashboard_data(log_file: Path) -> tuple[list[str], list[float], lis
     total_projected = round(sum(projected), 4)
     total_actual = round(sum(actual), 4)
     total_saved = round(max(total_projected - total_actual, 0.0), 4)
-    reduction_pct = round((total_saved / total_projected) * 100, 2) if total_projected > 0 else 0.0
+    reduction_pct = (
+        round((total_saved / total_projected) * 100, 2) if total_projected > 0 else 0.0
+    )
 
     projects_count = len(labels)
     tasks_count = len(rows)
@@ -309,7 +313,9 @@ def _collect_dashboard_data(log_file: Path) -> tuple[list[str], list[float], lis
 
 def generate_dashboard(output_file: Path) -> Path:
     tracker = GlobalImpactTracker()
-    labels, projected, actual, total_saved, star_metrics = _collect_dashboard_data(tracker.log_file)
+    labels, projected, actual, total_saved, star_metrics = _collect_dashboard_data(
+        tracker.log_file
+    )
 
     html = (
         HTML_TEMPLATE.replace("__LABELS__", json.dumps(labels))

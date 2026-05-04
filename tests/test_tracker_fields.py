@@ -24,6 +24,7 @@ def _read_row(log_file: Path, index: int = 0) -> dict[str, str]:
 
 # ── Nullable fields default to empty ─────────────────────────────────────────
 
+
 class TestNullableFieldDefaults:
     def test_task_type_defaults_empty(self, tmp_path):
         t = _make_tracker(tmp_path)
@@ -53,6 +54,7 @@ class TestNullableFieldDefaults:
 
 # ── Nullable fields write correctly when provided ─────────────────────────────
 
+
 class TestNullableFieldsWritten:
     def test_task_type_written(self, tmp_path):
         t = _make_tracker(tmp_path)
@@ -81,6 +83,7 @@ class TestNullableFieldsWritten:
 
 
 # ── Dollars_Saved auto-compute ────────────────────────────────────────────────
+
 
 class TestDollarsSavedAutoCompute:
     def test_auto_compute_when_not_provided(self, tmp_path):
@@ -112,6 +115,7 @@ class TestDollarsSavedAutoCompute:
 
 
 # ── Column count matches schema ───────────────────────────────────────────────
+
 
 class TestColumnSchema:
     def test_header_has_12_columns(self, tmp_path):

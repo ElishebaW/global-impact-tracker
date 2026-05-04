@@ -17,5 +17,5 @@ def test_python_module_entrypoint_prints_metrics_snapshot(tmp_path):
         text=True,
     )
 
-    assert "\"queries_processed\"" in result.stdout
+    assert '"queries_processed"' in result.stdout
     assert "Snapshot saved to:" in result.stdout

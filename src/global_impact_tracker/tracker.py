@@ -14,7 +14,11 @@ _FORMULA_PREFIXES = frozenset("=+-@\t\r\n＝＋－＠")
 
 def _sanitize_csv_field(value: str | None) -> str | None:
     """Prefix formula-triggering characters to prevent CSV injection."""
-    return ("\t" + value) if (isinstance(value, str) and value and value[0] in _FORMULA_PREFIXES) else value
+    return (
+        ("\t" + value)
+        if (isinstance(value, str) and value and value[0] in _FORMULA_PREFIXES)
+        else value
+    )
 
 
 class GlobalImpactTracker:
@@ -67,20 +71,22 @@ class GlobalImpactTracker:
 
         with open(self.log_file, "a", newline="", encoding="utf-8") as handle:
             writer = csv.writer(handle)
-            writer.writerow([
-                timestamp,
-                _sanitize_csv_field(project),
-                _sanitize_csv_field(task),
-                round(baseline_hrs, 4),
-                round(ai_sec, 4),
-                _sanitize_csv_field(status),
-                _sanitize_csv_field(task_type),
-                _sanitize_csv_field(complexity),
-                _sanitize_csv_field(tools_used),
-                dollars_saved,
-                _sanitize_csv_field(audience),
-                token_usage,
-            ])
+            writer.writerow(
+                [
+                    timestamp,
+                    _sanitize_csv_field(project),
+                    _sanitize_csv_field(task),
+                    round(baseline_hrs, 4),
+                    round(ai_sec, 4),
+                    _sanitize_csv_field(status),
+                    _sanitize_csv_field(task_type),
+                    _sanitize_csv_field(complexity),
+                    _sanitize_csv_field(tools_used),
+                    dollars_saved,
+                    _sanitize_csv_field(audience),
+                    token_usage,
+                ]
+            )
 
     def get_total_savings(self) -> float:
         projected = 0.0
@@ -95,11 +101,17 @@ class GlobalImpactTracker:
         queries_processed = len(rows)
 
         total_ai_sec = sum(self._to_float(r.get("AI_Sec")) for r in rows)
-        avg_response_time_ms = ((total_ai_sec / queries_processed) * 1000.0) if queries_processed else 0.0
+        avg_response_time_ms = (
+            ((total_ai_sec / queries_processed) * 1000.0) if queries_processed else 0.0
+        )
 
-        success_count = sum(1 for r in rows if (r.get("Status") or "").strip().lower() == "success")
+        success_count = sum(
+            1 for r in rows if (r.get("Status") or "").strip().lower() == "success"
+        )
         failed_count = queries_processed - success_count
-        success_rate_pct = ((success_count / queries_processed) * 100.0) if queries_processed else 0.0
+        success_rate_pct = (
+            ((success_count / queries_processed) * 100.0) if queries_processed else 0.0
+        )
 
         if success_rate_pct >= 95:
             system_health = "healthy"
@@ -109,11 +121,15 @@ class GlobalImpactTracker:
             system_health = "critical"
 
         unique_projects = len({(r.get("Project") or "Unknown").strip() for r in rows})
-        projected_manual_hours = sum(self._to_float(r.get("Human_Baseline_Hrs")) for r in rows)
+        projected_manual_hours = sum(
+            self._to_float(r.get("Human_Baseline_Hrs")) for r in rows
+        )
         ai_actual_hours = total_ai_sec / 3600.0
         total_hours_saved = max(projected_manual_hours - ai_actual_hours, 0.0)
         latency_reduction_pct = (
-            (total_hours_saved / projected_manual_hours) * 100.0 if projected_manual_hours > 0 else 0.0
+            (total_hours_saved / projected_manual_hours) * 100.0
+            if projected_manual_hours > 0
+            else 0.0
         )
 
         metrics = {
@@ -145,12 +161,22 @@ def _build_cli() -> argparse.ArgumentParser:
     log_parser.add_argument("--baseline-hrs", type=float, required=True)
     log_parser.add_argument("--ai-sec", type=float, required=True)
     log_parser.add_argument("--status", default="Success")
-    log_parser.add_argument("--task-type", default=None, help="feature | bug | refactor | review")
+    log_parser.add_argument(
+        "--task-type", default=None, help="feature | bug | refactor | review"
+    )
     log_parser.add_argument("--complexity", default=None, help="low | medium | high")
-    log_parser.add_argument("--tools-used", default=None, help="Pipe-separated: claude|windsurf|gemini")
-    log_parser.add_argument("--dollars-saved", type=float, default=None, help="Override auto-computed value")
-    log_parser.add_argument("--audience", default=None, help="self | manager | recruiter")
-    log_parser.add_argument("--token-usage", type=int, default=None, help="LLM tokens consumed")
+    log_parser.add_argument(
+        "--tools-used", default=None, help="Pipe-separated: claude|windsurf|gemini"
+    )
+    log_parser.add_argument(
+        "--dollars-saved", type=float, default=None, help="Override auto-computed value"
+    )
+    log_parser.add_argument(
+        "--audience", default=None, help="self | manager | recruiter"
+    )
+    log_parser.add_argument(
+        "--token-usage", type=int, default=None, help="LLM tokens consumed"
+    )
 
     subparsers.add_parser("metrics", help="Capture and print JSON metrics snapshot")
     return parser

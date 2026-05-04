@@ -8,6 +8,7 @@ from global_impact_tracker.tracker import GlobalImpactTracker, _sanitize_csv_fie
 
 # ── CSV injection sanitization ────────────────────────────────────────────────
 
+
 class TestSanitizeCsvField:
     # Standard formula prefixes
     def test_formula_prefix_equals(self):
@@ -47,7 +48,9 @@ class TestSanitizeCsvField:
 
     # Safe values
     def test_safe_string_unchanged(self):
-        assert _sanitize_csv_field("normal task description") == "normal task description"
+        assert (
+            _sanitize_csv_field("normal task description") == "normal task description"
+        )
 
     def test_none_passthrough(self):
         assert _sanitize_csv_field(None) is None
