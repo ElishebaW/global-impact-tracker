@@ -49,7 +49,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Add LLM-as-judge qualitative eval: HuggingFace Inference API as primary critic, graceful degradation to a locally-run Ollama model (e.g., Llama 3 8B) on rate-limit errors
 - Ollama is a required paid-tier install for the fallback eval path; document in paid-tier setup instructions
 
-## Phase 6: Packaging and polish
+## Phase 6: Packaging and polish (Complete)
 
 - Package the CLI for pip installation
 - Tighten installation and configuration docs

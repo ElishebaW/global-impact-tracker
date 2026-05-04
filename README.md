@@ -1,5 +1,10 @@
 # Global Impact Tracker
 
+[![CI](https://github.com/ElishebaW/global-impact-tracker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElishebaW/global-impact-tracker/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/global-impact-tracker)](https://pypi.org/project/global-impact-tracker/)
+[![Python versions](https://img.shields.io/pypi/pyversions/global-impact-tracker)](https://pypi.org/project/global-impact-tracker/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
 Global Impact Tracker is a local-first CLI for proving the value of AI-assisted work. Log tasks, capture metrics, and generate interview-ready STAR stories — all from the command line, with no hosted backend required.
 
 ---

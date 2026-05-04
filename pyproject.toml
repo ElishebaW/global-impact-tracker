@@ -29,7 +29,7 @@ Homepage = "https://github.com/ElishebaW/global-impact-tracker"
 "Bug Tracker" = "https://github.com/ElishebaW/global-impact-tracker/issues"
 
 [project.optional-dependencies]
-dev = ["pytest", "build", "twine"]
+dev = ["pytest", "build", "twine", "ruff", "bandit", "pip-audit"]
 
 [project.scripts]
 impact-tracker = "global_impact_tracker.tracker:main"

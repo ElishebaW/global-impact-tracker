@@ -33,7 +33,10 @@ class TestVerifyLicenseKey:
     def test_tampered_signature_returns_false(self):
         key = _sign("acme", "20991231")
         tampered = f"{key[:-1]}0"
-        assert entitlements.verify_license_key(tampered, today=dt.date(2026, 4, 23)) is False
+        assert (
+            entitlements.verify_license_key(tampered, today=dt.date(2026, 4, 23))
+            is False
+        )
 
     def test_tampered_customer_id_returns_false(self):
         key = _sign("acme", "20991231").replace("gip-acme-", "gip-other-", 1)
@@ -56,28 +59,66 @@ class TestVerifyLicenseKey:
         assert entitlements.verify_license_key(key, today=dt.date(2026, 4, 23)) is False
 
     def test_wrong_segment_count_returns_false(self):
-        assert entitlements.verify_license_key("gip-acme-20991231", today=dt.date(2026, 4, 23)) is False
+        assert (
+            entitlements.verify_license_key(
+                "gip-acme-20991231", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
 
     def test_empty_key_parts_return_false(self):
-        assert entitlements.verify_license_key("gip--20991231-deadbeef", today=dt.date(2026, 4, 23)) is False
-        assert entitlements.verify_license_key("gip-acme--deadbeef", today=dt.date(2026, 4, 23)) is False
-        assert entitlements.verify_license_key("gip-acme-20991231-", today=dt.date(2026, 4, 23)) is False
+        assert (
+            entitlements.verify_license_key(
+                "gip--20991231-deadbeef", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
+        assert (
+            entitlements.verify_license_key(
+                "gip-acme--deadbeef", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
+        assert (
+            entitlements.verify_license_key(
+                "gip-acme-20991231-", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
 
     def test_old_three_part_key_format_returns_false(self):
-        assert entitlements.verify_license_key("git-deadbeef-0123456789abcdef", today=dt.date(2026, 4, 23)) is False
+        assert (
+            entitlements.verify_license_key(
+                "git-deadbeef-0123456789abcdef", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
 
     def test_signature_must_be_exactly_64_lowercase_hex_characters(self):
-        assert entitlements.verify_license_key("gip-acme-20991231-abc123", today=dt.date(2026, 4, 23)) is False
+        assert (
+            entitlements.verify_license_key(
+                "gip-acme-20991231-abc123", today=dt.date(2026, 4, 23)
+            )
+            is False
+        )
         uppercase_sig = "A" * 64
-        assert entitlements.verify_license_key(
-            f"gip-acme-20991231-{uppercase_sig}",
-            today=dt.date(2026, 4, 23),
-        ) is False
+        assert (
+            entitlements.verify_license_key(
+                f"gip-acme-20991231-{uppercase_sig}",
+                today=dt.date(2026, 4, 23),
+            )
+            is False
+        )
 
     def test_placeholder_signing_key_rejects_all_keys(self):
         key = _sign("acme", "20991231")
-        with mock.patch.object(entitlements, "_SIGNING_KEY", entitlements._PLACEHOLDER_SIGNING_KEY):
-            assert entitlements.verify_license_key(key, today=dt.date(2026, 4, 23)) is False
+        with mock.patch.object(
+            entitlements, "_SIGNING_KEY", entitlements._PLACEHOLDER_SIGNING_KEY
+        ):
+            assert (
+                entitlements.verify_license_key(key, today=dt.date(2026, 4, 23))
+                is False
+            )
 
 
 class TestIsPro:
@@ -90,5 +131,7 @@ class TestIsPro:
             assert entitlements.is_pro() is False
 
     def test_valid_env_var_returns_true(self):
-        with mock.patch.dict(os.environ, {"IMPACT_TRACKER_LICENSE_KEY": _sign("acme", "20991231")}):
+        with mock.patch.dict(
+            os.environ, {"IMPACT_TRACKER_LICENSE_KEY": _sign("acme", "20991231")}
+        ):
             assert entitlements.is_pro() is True
