@@ -1,17 +1,35 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "global-impact-tracker"
 version = "0.1.0"
-description = "Local-first CLI for tracking AI-assisted work impact."
+description = "Local-first CLI for tracking AI-assisted work impact and generating STAR stories."
 readme = "README.md"
+license = { file = "LICENSE" }
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
+authors = [{ name = "Mass Ave Labs", email = "eanderson@massavelabs.com" }]
+keywords = ["ai", "productivity", "impact", "tracking", "star-stories", "cli"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Utilities",
+]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/ElishebaW/global-impact-tracker"
+"Bug Tracker" = "https://github.com/ElishebaW/global-impact-tracker/issues"
+
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "build", "twine"]
 
 [project.scripts]
 impact-tracker = "global_impact_tracker.tracker:main"

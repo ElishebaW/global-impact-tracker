@@ -39,7 +39,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Surface captured decisions in `generate_star_story` (already wired in `_build_star_prompt`; confirm round-trip works with real data)
 - Add a `get_decisions` MCP tool so decisions log is queryable directly from Claude Code
 
-## Phase 5: Reflection as tools (previously Phase 4)
+## Phase 5: Reflection as tools (Complete)
 
 - Expose metrics summary and STAR story generation as tool-callable actions
 - Allow agent workflows to chain metrics into narrative generation
@@ -55,20 +55,34 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Standardize local setup for free CLI users and paid MCP users
 - Clean up naming and repo-level documentation after the split
 
-## Phase 7: Gemini proxy service
+## Phase 7: CI/CD pipeline
+
+- Add a GitHub Actions workflow that runs on every pull request targeting `main` and every push to `main`:
+  - Lint with `ruff` (style and import hygiene)
+  - Format check with `ruff format --check`
+  - Security scan with `bandit` (common Python security issues)
+  - Dependency vulnerability scan with `pip-audit`
+  - `pytest` across Python 3.11, 3.12, and 3.13
+- Add a publish workflow triggered manually or on a tagged release (`v*`) that builds and uploads to PyPI
+- Store `PYPI_API_TOKEN` as a GitHub Actions secret
+- Add CI status and PyPI version badges to the README
+
+## Phase 8: Gemini proxy service
 
 - Move Gemini API usage for paid MCP features behind a small hosted proxy
 - Validate Pro keys server-side before forwarding Gemini requests
 - Remove the need for customers to supply their own `GEMINI_API_KEY`
 - Add proxy unit tests and MCP-to-proxy integration coverage
+- Also move `HUGGINGFACE_API_KEY` behind proxy for LLM-as-judge evaluations
 
 Notes for this phase:
 
 - This work happens after the repo split
 - The proxy should preserve existing paid gating through shared entitlement logic
 - A `PROXY_URL` should replace direct customer-side Gemini configuration for paid flows
+- Proxy handles both Gemini API calls and HuggingFace API calls for evaluations
 
-## Phase 8: Landing pages (free and paid tiers)
+## Phase 9: Landing pages (free and paid tiers)
 
 Build a product landing page for Global Impact Tracker modeled after codeguardian.studio — clean, developer-focused, with a clear free vs. paid tier split.
 
