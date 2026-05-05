@@ -1,3 +1,4 @@
+yes
 # Roadmap
 
 This roadmap reflects the current state of the project: core tracking, MCP integration, and reporting already exist. The next work should be split into very small phases, with licensing and repo separation first.
@@ -56,7 +57,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Standardize local setup for free CLI users and paid MCP users
 - Clean up naming and repo-level documentation after the split
 
-## Phase 7: CI/CD pipeline
+## Phase 7: CI/CD pipeline (Complete)
 
 - Add a GitHub Actions workflow that runs on every pull request targeting `main` and every push to `main`:
   - Lint with `ruff` (style and import hygiene)
