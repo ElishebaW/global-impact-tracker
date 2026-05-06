@@ -80,11 +80,10 @@ You will receive a license key (`gip-...`) and full installation instructions by
 pip install global-impact-tracker-mcp
 ```
 
-Set your license key and the proxy URL (both provided in your welcome email):
+Set your license key (provided in your welcome email):
 
 ```bash
 export IMPACT_TRACKER_LICENSE_KEY="gip-your-key-here"
-export PROXY_URL="https://your-proxy-url.run.app"
 ```
 
 ### Configure your client
@@ -101,8 +100,7 @@ Add to `~/.claude/claude_desktop_config.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "PROXY_URL": "https://your-proxy-url.run.app"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
       }
     }
   }
@@ -125,8 +123,7 @@ Add to `~/.codex/config.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "PROXY_URL": "https://your-proxy-url.run.app"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
       }
     }
   }
@@ -143,8 +140,7 @@ Add to `~/.gemini/settings.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "PROXY_URL": "https://your-proxy-url.run.app"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
       }
     }
   }
@@ -160,7 +156,6 @@ Open **Settings → MCP Servers → Add Server** and enter:
 | Name | `impact-tracker` |
 | Command | `impact-tracker-mcp` |
 | Env: `IMPACT_TRACKER_LICENSE_KEY` | `gip-your-key-here` |
-| Env: `PROXY_URL` | `https://your-proxy-url.run.app` |
 
 ### Sample prompts
 
@@ -218,7 +213,6 @@ The public package does not ship the MCP server, internal key issuance tooling, 
 | Variable | Where | Purpose |
 |---|---|---|
 | `IMPACT_TRACKER_LICENSE_KEY` | Customer | Activates Pro MCP features |
-| `PROXY_URL` | Customer | URL of the hosted proxy service (provided with license key) |
 
 ---
 
