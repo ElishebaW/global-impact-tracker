@@ -263,9 +263,9 @@ def _to_float(value: str | None) -> float:
 
 def _collect_dashboard_data(
     log_file: Path,
-) -> tuple[list[str], list[float], list[float], float, dict[str, float | int | str]]:
-    project_manual = defaultdict(float)
-    project_ai = defaultdict(float)
+) -> tuple[list[str], list[float], list[float], float, dict[str, object]]:
+    project_manual: dict[str, float] = defaultdict(float)
+    project_ai: dict[str, float] = defaultdict(float)
     rows = []
 
     if log_file.exists():
@@ -312,7 +312,7 @@ def _collect_dashboard_data(
 
 
 def generate_dashboard(output_file: Path) -> Path:
-    tracker = GlobalImpactTracker()
+    tracker: GlobalImpactTracker = GlobalImpactTracker()
     labels, projected, actual, total_saved, star_metrics = _collect_dashboard_data(
         tracker.log_file
     )
@@ -323,10 +323,10 @@ def generate_dashboard(output_file: Path) -> Path:
         .replace("__ACTUAL_HOURS__", json.dumps(actual))
         .replace("__TOTAL_SAVED_HOURS__", json.dumps(total_saved))
         .replace("__STAR_METRICS__", json.dumps(star_metrics))
-        .replace("__SITUATION_TEXT__", star_metrics["situation_text"])
-        .replace("__TASK_TEXT__", star_metrics["task_text"])
-        .replace("__ACTION_TEXT__", star_metrics["action_text"])
-        .replace("__RESULT_TEXT__", star_metrics["result_text"])
+        .replace("__SITUATION_TEXT__", str(star_metrics["situation_text"]))
+        .replace("__TASK_TEXT__", str(star_metrics["task_text"]))
+        .replace("__ACTION_TEXT__", str(star_metrics["action_text"]))
+        .replace("__RESULT_TEXT__", str(star_metrics["result_text"]))
     )
 
     output_file.write_text(html, encoding="utf-8")

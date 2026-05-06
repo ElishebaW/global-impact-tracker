@@ -80,11 +80,11 @@ You will receive a license key (`gip-...`) and full installation instructions by
 pip install global-impact-tracker-mcp
 ```
 
-You will also need a Gemini API key (free tier is sufficient):
+Set your license key and the proxy URL (both provided in your welcome email):
 
 ```bash
-export GEMINI_API_KEY="your-gemini-key"
 export IMPACT_TRACKER_LICENSE_KEY="gip-your-key-here"
+export PROXY_URL="https://your-proxy-url.run.app"
 ```
 
 ### Configure your client
@@ -102,7 +102,7 @@ Add to `~/.claude/claude_desktop_config.json`:
       "command": "impact-tracker-mcp",
       "env": {
         "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "GEMINI_API_KEY": "your-gemini-key"
+        "PROXY_URL": "https://your-proxy-url.run.app"
       }
     }
   }
@@ -126,7 +126,7 @@ Add to `~/.codex/config.json`:
       "command": "impact-tracker-mcp",
       "env": {
         "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "GEMINI_API_KEY": "your-gemini-key"
+        "PROXY_URL": "https://your-proxy-url.run.app"
       }
     }
   }
@@ -144,7 +144,7 @@ Add to `~/.gemini/settings.json`:
       "command": "impact-tracker-mcp",
       "env": {
         "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
-        "GEMINI_API_KEY": "your-gemini-key"
+        "PROXY_URL": "https://your-proxy-url.run.app"
       }
     }
   }
@@ -160,7 +160,7 @@ Open **Settings → MCP Servers → Add Server** and enter:
 | Name | `impact-tracker` |
 | Command | `impact-tracker-mcp` |
 | Env: `IMPACT_TRACKER_LICENSE_KEY` | `gip-your-key-here` |
-| Env: `GEMINI_API_KEY` | `your-gemini-key` |
+| Env: `PROXY_URL` | `https://your-proxy-url.run.app` |
 
 ### Sample prompts
 
@@ -218,7 +218,7 @@ The public package does not ship the MCP server, internal key issuance tooling, 
 | Variable | Where | Purpose |
 |---|---|---|
 | `IMPACT_TRACKER_LICENSE_KEY` | Customer | Activates Pro MCP features |
-| `GEMINI_API_KEY` | Customer | Powers STAR story generation and decisions capture |
+| `PROXY_URL` | Customer | URL of the hosted proxy service (provided with license key) |
 
 ---
 
