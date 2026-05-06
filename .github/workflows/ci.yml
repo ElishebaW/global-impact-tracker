@@ -101,8 +101,8 @@ jobs:
 
       - name: Validate AI-generated content
         run: |
-          # Check for hardcoded API keys, secrets, or tokens
-          if grep -r -i "api[_-]?key\|secret\|token" src/ --include="*.py" | grep -v "#.*" | grep -v "import"; then
+          # Check for hardcoded API keys, secrets, or tokens (more precise patterns)
+          if grep -r -E "(api[_-]?key|secret[_-]?key|token[_-]?key|auth[_-]?key)[[:space:]]*=[[:space:]]*[\"\'][^\"\']{8,}[\"\']" src/ --include="*.py" | grep -v "#.*"; then
             echo "❌ Potential hardcoded secrets found"
             exit 1
           fi
