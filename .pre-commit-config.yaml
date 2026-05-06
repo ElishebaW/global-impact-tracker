@@ -1,0 +1,62 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-toml
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: [--strict]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-r, src/, -f, json, -o, bandit-local-report.json]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: ai-output-validation
+        name: AI output validation
+        entry: bash -c '
+          # Check for hardcoded secrets
+          if grep -r -i "api[_-]?key\|secret\|token" src/ --include="*.py" | grep -v "#.*" | grep -v "import"; then
+            echo "❌ Potential hardcoded secrets found"
+            exit 1
+          fi
+          
+          # Check for unsafe eval/exec
+          if grep -r "eval(\|exec(" src/ --include="*.py" | grep -v "#.*"; then
+            echo "❌ Unsafe eval/exec usage found"
+            exit 1
+          fi
+          
+          # Check for injection patterns
+          if grep -r -E "(execute|query).*\+.*\%" src/ --include="*.py" | grep -v "#.*"; then
+            echo "❌ Potential injection patterns found"
+            exit 1
+          fi
+          
+          echo "✅ AI output validation passed"
+        '
+        language: system
+        types: [python]
+        pass_filenames: false

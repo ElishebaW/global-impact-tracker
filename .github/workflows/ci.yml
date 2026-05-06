@@ -39,13 +39,15 @@ jobs:
         run: bandit -r src/ -f json -o bandit-report.json || true
 
       - name: OWASP security scan (semgrep)
-        run: semgrep --config=auto --json --output=semgrep-report.json src/ || true
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
 
       - name: Dependency audit (pip-audit)
         run: pip-audit --format=json --output=pip-audit-report.json || true
 
       - name: Dependency vulnerability scan (safety)
-        run: safety check --json --output=safety-report.json || true
+        run: safety check --json > safety-report.json || true
 
       - name: Tests
         run: pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
@@ -63,16 +65,6 @@ jobs:
             if [ "$HIGH_ISSUES" -gt 0 ]; then
               echo "❌ Found $HIGH_ISSUES high-severity security issues"
               cat bandit-report.json | jq '.results[] | select(.issue_severity == "HIGH")'
-              exit 1
-            fi
-          fi
-
-          # Fail on OWASP findings
-          if [ -f semgrep-report.json ]; then
-            OWASP_ISSUES=$(cat semgrep-report.json | jq '.results[] | select(.metadata.category | contains("security")) | .rule_id' | wc -l)
-            if [ "$OWASP_ISSUES" -gt 0 ]; then
-              echo "❌ Found $OWASP_ISSUES OWASP security issues"
-              cat semgrep-report.json | jq '.results[] | select(.metadata.category | contains("security"))'
               exit 1
             fi
           fi
