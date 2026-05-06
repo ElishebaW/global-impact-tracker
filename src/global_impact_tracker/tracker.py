@@ -22,14 +22,14 @@ def _sanitize_csv_field(value: str | None) -> str | None:
 
 
 class GlobalImpactTracker:
-    def __init__(self):
+    def __init__(self) -> None:
         self.log_file = MASTER_CSV_PATH
         self.log_dir = self.log_file.parent
         self.log_dir.mkdir(exist_ok=True)
         self.metrics_file = self.log_dir / "metrics_snapshot.json"
         self._ensure_log_exists()
 
-    def _ensure_log_exists(self):
+    def _ensure_log_exists(self) -> None:
         if not self.log_file.exists():
             with open(self.log_file, "w", newline="", encoding="utf-8") as handle:
                 writer = csv.writer(handle)
@@ -96,7 +96,7 @@ class GlobalImpactTracker:
             actual += self._to_float(row.get("AI_Sec")) / 3600.0
         return round(max(projected - actual, 0.0), 4)
 
-    def capture_metrics_snapshot(self) -> dict[str, float | int | str]:
+    def capture_metrics_snapshot(self) -> dict[str, object]:
         rows = self._read_rows()
         queries_processed = len(rows)
 
