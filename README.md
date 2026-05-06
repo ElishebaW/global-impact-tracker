@@ -211,56 +211,6 @@ How many hours have I saved this month across all projects?
 
 ## Design decisions
 
-### CSV over a database
-
-The task log is a plain CSV file at `~/.impact_tracker/global_productivity.csv` — not SQLite, not a hosted database.
-
-**Why:** The core use case is personal productivity tracking. A CSV file is inspectable in any spreadsheet, trivially portable, and requires zero infrastructure. A database would add setup friction and a migration story with no meaningful payoff for a single-user local tool. The tradeoff is that querying gets expensive at very high row counts, but a developer would need to log thousands of tasks before that matters.
-
----
-
-### Local-first, no backend on the free tier
-
-The CLI computes all metrics and generates the dashboard from local files. No data is sent to any server unless you opt into the MCP server.
-
-**Why:** Engineers tracking their own work shouldn't have to trust a third party with that data. Local-first also means it works offline, costs nothing to operate, and survives the service shutting down. The tradeoff is that cross-device sync and team dashboards are not possible on the free tier — that's a deliberate product boundary, not an oversight.
-
----
-
-### HMAC license keys over a hosted auth service
-
-License keys are self-verifiable: the MCP server checks a HMAC signature locally without making a network call.
-
-**Why:** A hosted auth service would mean the MCP server fails to start whenever the auth service is down — unacceptable for a tool that runs inside a developer's IDE. HMAC keys let the server verify entitlements instantly and offline. The tradeoff is that key revocation requires a key rotation (there is no real-time blocklist), which is acceptable for an indie product at this scale.
-
----
-
-### Proxy for API keys instead of distributing them to customers
-
-The Cloud Run proxy holds Gemini and HuggingFace API keys in GCP Secret Manager. Customers authenticate with a license key; the proxy authenticates to upstream APIs on their behalf.
-
-**Why:** Distributing API keys to customers means losing control of them. A single compromised customer environment would expose the key for all users. The proxy lets us rotate keys in one place, rate-limit by license key, and keep customers entirely out of the API key management loop. The tradeoff is an added network hop and an infrastructure component to operate.
-
----
-
-### LLM-as-judge evals over rule-based scoring
-
-STAR story quality is evaluated by a second LLM (Llama 3.3 70B via HuggingFace, with Ollama as a local fallback) rather than a deterministic rubric.
-
-**Why:** "Is this a compelling interview story?" is a judgment call that doesn't reduce to keyword matching or length checks. An LLM evaluator can assess narrative coherence, metric grounding, and specificity the way a human interviewer would. The tradeoff is non-determinism — the same story can get slightly different scores on different runs — but the score is used as a quality signal, not a hard gate, so variance is acceptable.
-
----
-
-### Split public/private repos
-
-The public `global-impact-tracker` package on PyPI contains the CLI and tracker logic. The MCP server, signing key, and proxy live in a private companion repo.
-
-**Why:** The signing secret for HMAC key verification must never appear in a public commit. Keeping it in a private repo prevents accidental exposure while still allowing the core tracker to be open source and auditable. The tradeoff is that contributors can see the public package logic but cannot run the full paid feature stack locally without operator credentials.
-
----
-
-## Design decisions
-
 ### API key proxy instead of distributing keys to customers
 
 The Cloud Run proxy holds Gemini and HuggingFace API keys in GCP Secret Manager. Customers only configure a license key — the proxy authenticates to upstream APIs on their behalf using a shared bearer token known only to the operator.
