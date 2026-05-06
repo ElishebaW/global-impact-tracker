@@ -209,6 +209,118 @@ How many hours have I saved this month across all projects?
 
 ---
 
+## Design decisions
+
+### CSV over a database
+
+The task log is a plain CSV file at `~/.impact_tracker/global_productivity.csv` — not SQLite, not a hosted database.
+
+**Why:** The core use case is personal productivity tracking. A CSV file is inspectable in any spreadsheet, trivially portable, and requires zero infrastructure. A database would add setup friction and a migration story with no meaningful payoff for a single-user local tool. The tradeoff is that querying gets expensive at very high row counts, but a developer would need to log thousands of tasks before that matters.
+
+---
+
+### Local-first, no backend on the free tier
+
+The CLI computes all metrics and generates the dashboard from local files. No data is sent to any server unless you opt into the MCP server.
+
+**Why:** Engineers tracking their own work shouldn't have to trust a third party with that data. Local-first also means it works offline, costs nothing to operate, and survives the service shutting down. The tradeoff is that cross-device sync and team dashboards are not possible on the free tier — that's a deliberate product boundary, not an oversight.
+
+---
+
+### HMAC license keys over a hosted auth service
+
+License keys are self-verifiable: the MCP server checks a HMAC signature locally without making a network call.
+
+**Why:** A hosted auth service would mean the MCP server fails to start whenever the auth service is down — unacceptable for a tool that runs inside a developer's IDE. HMAC keys let the server verify entitlements instantly and offline. The tradeoff is that key revocation requires a key rotation (there is no real-time blocklist), which is acceptable for an indie product at this scale.
+
+---
+
+### Proxy for API keys instead of distributing them to customers
+
+The Cloud Run proxy holds Gemini and HuggingFace API keys in GCP Secret Manager. Customers authenticate with a license key; the proxy authenticates to upstream APIs on their behalf.
+
+**Why:** Distributing API keys to customers means losing control of them. A single compromised customer environment would expose the key for all users. The proxy lets us rotate keys in one place, rate-limit by license key, and keep customers entirely out of the API key management loop. The tradeoff is an added network hop and an infrastructure component to operate.
+
+---
+
+### LLM-as-judge evals over rule-based scoring
+
+STAR story quality is evaluated by a second LLM (Llama 3.3 70B via HuggingFace, with Ollama as a local fallback) rather than a deterministic rubric.
+
+**Why:** "Is this a compelling interview story?" is a judgment call that doesn't reduce to keyword matching or length checks. An LLM evaluator can assess narrative coherence, metric grounding, and specificity the way a human interviewer would. The tradeoff is non-determinism — the same story can get slightly different scores on different runs — but the score is used as a quality signal, not a hard gate, so variance is acceptable.
+
+---
+
+### Split public/private repos
+
+The public `global-impact-tracker` package on PyPI contains the CLI and tracker logic. The MCP server, signing key, and proxy live in a private companion repo.
+
+**Why:** The signing secret for HMAC key verification must never appear in a public commit. Keeping it in a private repo prevents accidental exposure while still allowing the core tracker to be open source and auditable. The tradeoff is that contributors can see the public package logic but cannot run the full paid feature stack locally without operator credentials.
+
+---
+
+## Design decisions
+
+### API key proxy instead of distributing keys to customers
+
+The Cloud Run proxy holds Gemini and HuggingFace API keys in GCP Secret Manager. Customers only configure a license key — the proxy authenticates to upstream APIs on their behalf using a shared bearer token known only to the operator.
+
+**Why not give customers direct API keys?** Distributing keys to customers means losing control of them permanently. A single compromised customer environment exposes the key for every user on the same key. There is no practical way to scope or audit usage per customer when they all hold the same credential.
+
+**The proxy pattern gives you:** key rotation in one place without any customer action, per-license-key rate limiting and abuse detection, and a clean separation between what the customer needs to know (their license key) and what the operator needs to manage (upstream API credentials).
+
+**Tradeoff:** An extra network hop on every LLM call, and an infrastructure component to operate and keep available. A proxy outage takes down Pro features for all users simultaneously — which is why the Ollama fallback exists for evals.
+
+---
+
+### HMAC license keys over a hosted auth service
+
+License keys are self-verifiable: the MCP server checks a HMAC-SHA256 signature locally without making a network call at startup or on every tool invocation.
+
+**Why not a hosted auth service?** A hosted auth service that goes down takes your product down with it — every customer's MCP server would fail to start until the service recovered. For a tool that runs inside a developer's IDE during active coding sessions, that failure mode is unacceptable. The MCP server becomes unreliable in exactly the moments developers rely on it most.
+
+**The HMAC pattern gives you:** instant offline verification, zero latency on entitlement checks, and no single point of failure. The key encodes the customer ID and expiry date; the server verifies the signature without phoning home.
+
+**Tradeoff:** Key revocation requires rotating to a new key — there is no real-time blocklist. A leaked key is valid until it expires or the customer is issued a replacement. This is an acceptable tradeoff at indie scale; a large enterprise product would need a hybrid approach with short-lived tokens and a revocation endpoint.
+
+---
+
+### LLM-as-judge evals over rule-based scoring
+
+STAR story quality is evaluated by a second LLM (Llama 3.3 70B via HuggingFace, Ollama locally) rather than a deterministic rubric.
+
+**Why not rule-based scoring?** "Is this a compelling interview story?" does not reduce to keyword matching, length checks, or metric presence tests. A story can include every number from the metrics snapshot and still be generic and forgettable. The qualities that make a STAR story effective — specific engineering decisions, a clear causal chain from action to result, language that would make a hiring manager stop scrolling — are judgment calls, not rules.
+
+**The LLM-as-judge pattern gives you:** a scoring signal that correlates with human evaluation, a structured critique that tells the user *why* a story scored low, and the ability to improve the evaluator prompt without touching the generation pipeline.
+
+**Tradeoff:** Non-determinism — the same story can score differently on different runs. This is mitigated by treating the score as a directional signal rather than a hard gate, and by using low temperature (0.1) to reduce variance. The deeper tradeoff is that the judge shares failure modes with the generator: both are LLMs and both can be confidently wrong.
+
+---
+
+### Local-first storage with CSV
+
+Task logs are stored in a plain CSV at `~/.impact_tracker/global_productivity.csv`. No database, no server, no sync.
+
+**Why:** The target user is a single developer tracking their own work. A CSV is inspectable in any spreadsheet, trivially portable, and requires zero infrastructure to operate or maintain. The tradeoff is that complex queries get expensive at very high row counts — but a developer would need to log thousands of tasks before that matters in practice.
+
+---
+
+### HMAC verification in the MCP server, not the proxy
+
+The proxy authenticates callers with a bearer token only — it does not re-verify the customer's license key. License validation happens entirely in the MCP server before it makes any proxy call.
+
+**Why:** The proxy is operator infrastructure; it should not need to know anything about the customer key format or signing algorithm. Centralizing entitlement logic in the MCP server keeps the proxy stateless and generic, makes it easier to test, and means a change to the licensing scheme only touches one codebase.
+
+---
+
+### Public/private repo split
+
+The public `global-impact-tracker` package on PyPI contains the CLI and tracker logic. The MCP server, signing key, and proxy live in a private companion repo.
+
+**Why:** The HMAC signing secret must never appear in a public commit — if it did, anyone could forge valid license keys. The split lets the core tracker be open source and auditable while keeping the signing secret in a controlled environment. The tradeoff is that contributors can inspect the public package but cannot run the full Pro feature stack without operator credentials.
+
+---
+
 ## Public package boundary
 
 The public package contains:
