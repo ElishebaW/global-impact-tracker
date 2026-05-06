@@ -195,6 +195,20 @@ How many hours have I saved this month across all projects?
 
 ---
 
+## Architecture
+
+![Global Impact Tracker architecture diagram](docs/architecture.png)
+
+| Component | Role |
+|---|---|
+| **CLI** | Logs tasks and generates the local dashboard; reads/writes `~/.impact_tracker/` on your machine |
+| **MCP Server** | Runs inside your AI coding environment; orchestrates STAR story generation and LLM-as-judge evals |
+| **Cloud Run Proxy** | Operator-managed service that holds Gemini and HuggingFace API keys; the MCP server authenticates to it with a bearer token |
+| **Gemini** | Generates STAR stories from your real metrics |
+| **HuggingFace** | Runs LLM-as-judge evals on generated stories; Ollama is the local fallback |
+
+---
+
 ## Public package boundary
 
 The public package contains:
