@@ -19,7 +19,7 @@ def test_huggingface_forwards_body(client, valid_headers, mock_hf):
         response = client.post("/huggingface/models/mistralai/Mistral-7B", headers=valid_headers, json={"inputs": "hello"})
     assert response.status_code == 200
     call_kwargs = mock_hf.call_args
-    assert "api-inference.huggingface.co" in call_kwargs.args[0]
+    assert "router.huggingface.co" in call_kwargs.args[0]
 
 
 def test_huggingface_injects_api_key(client, valid_headers, mock_hf):

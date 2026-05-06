@@ -33,3 +33,6 @@ build/
 
 # Tools (private repo only)
 tools/
+
+# Internal ops docs
+proxy/DEPLOY.md
