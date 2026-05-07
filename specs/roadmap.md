@@ -69,7 +69,7 @@ Must follow immediately after Phase 1 merges — do not ship the MCP server to c
 - Store `PYPI_API_TOKEN` as a GitHub Actions secret
 - Add CI status and PyPI version badges to the README
 
-## Phase 8: Gemini proxy service
+## Phase 8: Gemini proxy service (Complete)
 
 - Move Gemini API usage for paid MCP features behind a small hosted proxy
 - Validate Pro keys server-side before forwarding Gemini requests
@@ -84,7 +84,7 @@ Notes for this phase:
 - A `PROXY_URL` should replace direct customer-side Gemini configuration for paid flows
 - Proxy handles both Gemini API calls and HuggingFace API calls for evaluations
 
-## Phase 9: Landing pages (free and paid tiers)
+## Phase 9: Landing pages (free and paid tiers) (Complete)
 
 Build a product landing page for Global Impact Tracker modeled after codeguardian.studio — clean, developer-focused, with a clear free vs. paid tier split.
 
