@@ -16,7 +16,11 @@ env/
 # Generated outputs
 core/live_impact_dashboard.html
 core/__pycache__/
-mcp/__pycache__/
+
+# Legacy / moved to private repo
+mcp/
+proxy/
+orchestration_insights/
 
 # Build artifacts
 dist/
@@ -33,6 +37,3 @@ build/
 
 # Tools (private repo only)
 tools/
-
-# Internal ops docs
-proxy/DEPLOY.md
