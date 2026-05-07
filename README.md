@@ -5,7 +5,20 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/global-impact-tracker)](https://pypi.org/project/global-impact-tracker/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-Global Impact Tracker is a local-first CLI for proving the value of AI-assisted work. Log tasks, capture metrics, and generate interview-ready STAR stories — all from the command line, with no hosted backend required.
+Global Impact Tracker is an open-source CLI + MCP server that transforms raw AI-assisted work into interview-ready STAR stories. Log your tasks, capture real metrics, and generate narratives grounded in actual numbers — all locally, with zero data leaving your machine. Built for engineers who want to quantify their impact and tell compelling stories in interviews.
+
+---
+
+## Why build this?
+
+Engineers who use AI tools (Claude, Copilot, Gemini) consistently struggle to articulate their impact in interviews and performance reviews. Traditional metrics, lines of code, velocity points, don't capture what actually changed: the efficiency gains, the decisions made faster, the hours freed up for harder problems.
+
+Global Impact Tracker lets you log AI-assisted work in real time, track objective metrics, and generate STAR stories grounded in actual numbers. No fabrication. No estimation. Pure data.
+
+**Who it's for:**
+- Individual engineers preparing for job interviews or performance reviews
+- Technical leads quantifying team productivity
+- Anyone building a portfolio that shows engineering judgment, not just code
 
 ---
 
@@ -33,6 +46,34 @@ impact-tracker log \
 
 ```
 Logged run to: /Users/you/.impact_tracker/global_productivity.csv
+```
+
+More examples:
+
+```bash
+# Refactoring — 8 hours of work in 3 minutes (160x speedup, $703 saved)
+impact-tracker log \
+  --project "User Service" \
+  --task "Refactored auth middleware to use distributed session store" \
+  --baseline-hrs 8.0 \
+  --ai-sec 180 \
+  --status "Success" \
+  --task-type refactor \
+  --complexity high \
+  --tools-used "claude|windsurf"
+```
+
+```bash
+# Feature implementation — 6 hours in 4 minutes (90x speedup, $524 saved)
+impact-tracker log \
+  --project "Payments" \
+  --task "Built event-driven retry logic for failed transactions" \
+  --baseline-hrs 6.0 \
+  --ai-sec 240 \
+  --status "Success" \
+  --task-type feature \
+  --complexity high \
+  --tools-used "claude|gemini"
 ```
 
 ### Capture metrics
@@ -195,6 +236,33 @@ How many hours have I saved this month across all projects?
 
 ---
 
+## Deployment
+
+### Option 1: Local (free tier)
+
+Install via pip, run on your developer machine, no license key required. All data stays at `~/.impact_tracker/` on your machine.
+
+```bash
+pip install global-impact-tracker
+```
+
+### Option 2: MCP server (premium)
+
+Install the companion MCP server, set your license key, configure your AI IDE. STAR story generation and LLM evals run via a Cloud Run proxy — the proxy holds API keys so you never configure upstream credentials directly.
+
+```bash
+pip install global-impact-tracker-mcp
+export IMPACT_TRACKER_LICENSE_KEY="gip-your-key-here"
+```
+
+### Security notes
+
+- License keys are `gip-*` format and verified locally via HMAC — no network call at startup
+- No task data leaves your machine on the free tier
+- The Cloud Run proxy holds Gemini and HuggingFace credentials in GCP Secret Manager; customers only configure their license key
+
+---
+
 ## Architecture
 
 ![Global Impact Tracker architecture diagram](docs/architecture.png)
@@ -289,6 +357,24 @@ The public package does not ship the MCP server, internal key issuance tooling, 
 | Variable | Where | Purpose |
 |---|---|---|
 | `IMPACT_TRACKER_LICENSE_KEY` | Customer | Activates Pro MCP features |
+
+---
+
+## Troubleshooting
+
+**"License key not found"** — Set `IMPACT_TRACKER_LICENSE_KEY` in your environment and restart your IDE.
+
+**"CSV file is empty"** — Check `~/.impact_tracker/`. Create it if missing:
+```bash
+mkdir -p ~/.impact_tracker/
+```
+
+**"MCP server won't start"** — Verify Python 3.9+. Check logs:
+```bash
+tail -f ~/.impact_tracker/logs/mcp.log
+```
+
+**"Can't generate STAR story"** — Requires premium tier. [Request a free key →](https://forms.gle/D3mVGqnsDdf18VaM8)
 
 ---
 

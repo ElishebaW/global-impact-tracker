@@ -63,6 +63,11 @@ class GlobalImpactTracker:
         audience: str | None = None,
         token_usage: int | None = None,
     ) -> None:
+        """Append one AI-assisted task to the local CSV log.
+
+        dollars_saved defaults to (baseline_hrs - ai_sec/3600) * DEFAULT_HOURLY_RATE
+        when not provided. Negative savings (ai_sec > baseline) are clamped to zero.
+        """
         timestamp = datetime.now().strftime("%Y-%m-%d")
 
         if dollars_saved is None:
@@ -89,6 +94,7 @@ class GlobalImpactTracker:
             )
 
     def get_total_savings(self) -> float:
+        """Return total hours saved across all logged tasks, clamped to >= 0."""
         projected = 0.0
         actual = 0.0
         for row in self._read_rows():
@@ -97,6 +103,13 @@ class GlobalImpactTracker:
         return round(max(projected - actual, 0.0), 4)
 
     def capture_metrics_snapshot(self) -> dict[str, object]:
+        """Compute aggregate metrics from all logged rows and persist to metrics_snapshot.json.
+
+        Returns a dict with keys: timestamp_utc, queries_processed, avg_response_time_ms,
+        system_health, success/failed counts, success_rate_pct, projects_count,
+        projected_manual_hours, ai_actual_hours, total_hours_saved, latency_reduction_pct.
+        system_health is "healthy" (>=95% success), "degraded" (>=80%), or "critical".
+        """
         rows = self._read_rows()
         queries_processed = len(rows)
 
