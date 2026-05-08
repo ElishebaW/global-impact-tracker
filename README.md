@@ -121,15 +121,19 @@ You will receive a license key (`gip-...`) and full installation instructions by
 pip install global-impact-tracker-mcp
 ```
 
-Set your license key (provided in your welcome email):
+Set the environment variables provided in your welcome email:
 
 ```bash
 export IMPACT_TRACKER_LICENSE_KEY="gip-your-key-here"
+export PROXY_URL="https://your-proxy-url"
+export PROXY_BEARER_TOKEN="your-bearer-token"
 ```
 
 ### Configure your client
 
 Pick the tab for your AI coding environment.
+
+All three values below (`IMPACT_TRACKER_LICENSE_KEY`, `PROXY_URL`, `PROXY_BEARER_TOKEN`) are provided in your welcome email.
 
 #### Claude Code
 
@@ -141,7 +145,9 @@ Add to `~/.claude/claude_desktop_config.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
+        "PROXY_URL": "https://your-proxy-url",
+        "PROXY_BEARER_TOKEN": "your-bearer-token"
       }
     }
   }
@@ -164,7 +170,9 @@ Add to `~/.codex/config.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
+        "PROXY_URL": "https://your-proxy-url",
+        "PROXY_BEARER_TOKEN": "your-bearer-token"
       }
     }
   }
@@ -181,7 +189,9 @@ Add to `~/.gemini/settings.json`:
     "impact-tracker": {
       "command": "impact-tracker-mcp",
       "env": {
-        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here"
+        "IMPACT_TRACKER_LICENSE_KEY": "gip-your-key-here",
+        "PROXY_URL": "https://your-proxy-url",
+        "PROXY_BEARER_TOKEN": "your-bearer-token"
       }
     }
   }
@@ -197,6 +207,8 @@ Open **Settings → MCP Servers → Add Server** and enter:
 | Name | `impact-tracker` |
 | Command | `impact-tracker-mcp` |
 | Env: `IMPACT_TRACKER_LICENSE_KEY` | `gip-your-key-here` |
+| Env: `PROXY_URL` | `https://your-proxy-url` |
+| Env: `PROXY_BEARER_TOKEN` | `your-bearer-token` |
 
 ### Sample prompts
 
@@ -253,13 +265,15 @@ Install the companion MCP server, set your license key, configure your AI IDE. S
 ```bash
 pip install global-impact-tracker-mcp
 export IMPACT_TRACKER_LICENSE_KEY="gip-your-key-here"
+export PROXY_URL="https://your-proxy-url"
+export PROXY_BEARER_TOKEN="your-bearer-token"
 ```
 
 ### Security notes
 
 - License keys are `gip-*` format and verified locally via HMAC — no network call at startup
 - No task data leaves your machine on the free tier
-- The Cloud Run proxy holds Gemini and HuggingFace credentials in GCP Secret Manager; customers only configure their license key
+- The Cloud Run proxy holds Gemini and HuggingFace credentials in GCP Secret Manager; customers configure their license key, proxy URL, and bearer token — all provided at onboarding
 
 ---
 
@@ -357,12 +371,14 @@ The public package does not ship the MCP server, internal key issuance tooling, 
 | Variable | Where | Purpose |
 |---|---|---|
 | `IMPACT_TRACKER_LICENSE_KEY` | Customer | Activates Pro MCP features |
+| `PROXY_URL` | Customer | Proxy endpoint — provided in your welcome email |
+| `PROXY_BEARER_TOKEN` | Customer | Authenticates your MCP server to the proxy — provided in your welcome email |
 
 ---
 
 ## Troubleshooting
 
-**"License key not found"** — Set `IMPACT_TRACKER_LICENSE_KEY` in your environment and restart your IDE.
+**"License key not found"** — Set `IMPACT_TRACKER_LICENSE_KEY`, `PROXY_URL`, and `PROXY_BEARER_TOKEN` in your MCP client config (all three are in your welcome email) and restart your IDE.
 
 **"CSV file is empty"** — Check `~/.impact_tracker/`. Create it if missing:
 ```bash
