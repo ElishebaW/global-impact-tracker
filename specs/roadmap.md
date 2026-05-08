@@ -96,6 +96,28 @@ Build a product landing page for Global Impact Tracker modeled after codeguardia
 - Host on the same domain pattern or a dedicated subdomain (e.g. globalimpacttracker.dev)
 - Tie into the packaging phase — landing page goes live when pip install is ready
 
+## Phase 10: Groq fallback + CLI task logging
+
+Replace Ollama with Groq as the fallback model provider when Gemini is unavailable, and surface task logging via CLI so users don't need MCP to record work.
+
+### Groq fallback
+- Add `GROQ_API_KEY` as an optional env var; document in `.env.example` and setup instructions
+- Wire Groq (`qwen-2.5-7b-instruct` or `llama-3.1-8b-instant`) as the fallback in the proxy when Gemini returns 4xx/5xx or is unreachable
+- Fallback order: Gemini → Groq → graceful error (remove Ollama requirement from paid tier)
+- Update Phase 5 Ollama note in docs: Ollama no longer required; Groq API key is the paid-tier fallback
+- Add integration test: mock Gemini failure → confirm Groq is called → confirm output shape matches
+
+### CLI task logging
+- Expose `gip log` (or equivalent) CLI command so free-tier users can log tasks without the MCP server
+- Accept `--project`, `--task`, `--context`, `--audience` flags matching the MCP `log_task` schema
+- Write to `~/.impact_tracker/tasks.jsonl` (same format as MCP path)
+- Add `--dry-run` flag to preview the entry without writing
+- Add CLI tests and update CLI reference docs
+
+**Done when:** A user with only a Groq API key (no Gemini, no Ollama) can log a task and generate a STAR story end-to-end.
+
+---
+
 ## Sequencing rules
 
 - Prefer the smallest change that reduces product risk first
