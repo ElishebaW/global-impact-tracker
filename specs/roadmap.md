@@ -96,7 +96,21 @@ Build a product landing page for Global Impact Tracker modeled after codeguardia
 - Host on the same domain pattern or a dedicated subdomain (e.g. globalimpacttracker.dev)
 - Tie into the packaging phase — landing page goes live when pip install is ready
 
-## Phase 10: Groq fallback + CLI task logging
+## Phase 10: Host MCP server on Cloud Run
+
+Move the private MCP server from a local stdio process to a hosted Cloud Run service so paid users connect remotely without installing the private package. This is a prerequisite for serving any paying customers who are not the developer.
+
+- Switch `server.py:main()` to `streamable-http` transport when `PORT` env var is set (Cloud Run sets this automatically); keep `stdio` as the local default
+- Replace local CSV reads/writes (`~/.impact_tracker/`) with GCS-backed storage so data persists and is accessible from the cloud; each user's data is isolated under a GCS prefix keyed by their customer ID (decoded from the license key)
+- Validate `IMPACT_TRACKER_LICENSE_KEY` from the `Authorization` header on every request; reject unauthenticated calls with 401 before any tool runs
+- Add a `Dockerfile` for the MCP server (separate from the existing proxy Dockerfile)
+- Deploy to Cloud Run in `global-impact-tracker-prod`; document the `gcloud run deploy` command
+- Update paid-tier setup docs: users configure Claude with the Cloud Run URL instead of a local binary path
+- Add smoke test: configure a test client against the deployed service, call `get_metrics`, assert a non-error response
+
+**Done when:** A user with a valid license key can add the Cloud Run URL to their Claude config, run `generate_star_story`, and get a result — with no local package installation.
+
+## Phase 11: Groq fallback + CLI task logging
 
 Replace Ollama with Groq as the fallback model provider when Gemini is unavailable, and surface task logging via CLI so users don't need MCP to record work.
 
